@@ -77,3 +77,18 @@ class Join:
 		self.alias: str = alias
 		self.type: str = type 
 		self.filters: list[Filter] = filters
+
+
+# db types
+
+class SocialRatingRecord:
+  def __init__(self, user_id: int, rating: int):
+    self.user_id = user_id
+    self.rating = rating
+	
+class MembershipRecord:
+  def __init__(self, user_id: int, about_me: str, color: int, custom_image: str):
+    self.user_id = user_id
+    self.about_me = about_me
+    self.color = color
+    self.custom_image = custom_image

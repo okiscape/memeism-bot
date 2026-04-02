@@ -72,6 +72,7 @@ class InfoCommand(cog.Cog):
 				color=0xEB459E,
 			).set_image(url=users.banner.url)
 			await inter.edit_original_response(embed=embed)
+			
 		except Exception:
 			await inter.edit_original_response(
 				await self.bot.shortcuts.tbc(
@@ -94,7 +95,7 @@ class InfoCommand(cog.Cog):
 		news = "Да" if channel.is_news() else "Нет"
 		ts = int(channel.created_at.timestamp())
 		embed = cog.Embed()
-		embed.title = await self.bot.shortcuts.tbc(inter, f"Информация о канале #*{channel.name}*")
+		embed.title = await self.bot.shortcuts.tbc(inter, f"Информация о канале #{channel.name}")
 		embed.description = await self.bot.shortcuts.tbc(
 			inter,
 			f"ID канала: `{channel.id}`\n"
@@ -215,7 +216,7 @@ class InfoCommand(cog.Cog):
 			url=config.support_invite_url,
 			description=await self.bot.shortcuts.tbc(
 				inter,
-				"memeism — экономия времени, потрать его с пользой!",
+				"memeism — океан интеграций",
 			),
 			color=config.gray,
 		)
@@ -239,33 +240,17 @@ class InfoCommand(cog.Cog):
 			value=f"<t:{bot_created}:D> | <t:{bot_created}:R>",
 			inline=False,
 		)
-		embed.add_field(
-			name=await self.bot.shortcuts.tbc(inter, f"{self.bot.custom_emojis.icon_link} | Голосовые клиенты"),
-			value=await self.bot.shortcuts.tbc(
-				inter,
-				f"В данный момент бот действует в `{len(self.bot.voice_clients)}` голосовых каналов",
-			),
-			inline=False,
-		)
+		
 		embed.add_field(
 			name=await self.bot.shortcuts.tbc(inter, f"{self.bot.custom_emojis.icon_duoup} | Версия"),
 			value=await self.bot.shortcuts.tbc(
 				inter,
-				f"Сейчас моя версия под номером `{config.version_number}`\n"
+				f"Версия: `{config.version_number}`\n"
 				f"Тайтл версии: `{config.version_name}`",
 			),
 			inline=False,
 		)
-		async for _guild in self.bot.fetch_guilds(limit=None):
-			pass
-		embed.add_field(
-			name=await self.bot.shortcuts.tbc(
-				inter,
-				f"{self.bot.custom_emojis.icon_layers} | Количество серверов на которых я есть",
-			),
-			value=await self.bot.shortcuts.tbc(inter, f"{len(self.bot.guilds)} серверов"),
-			inline=True,
-		)
+		
 		cmd_sum = (
 			len(self.bot.all_user_commands)
 			+ len(self.bot.all_message_commands)
@@ -357,10 +342,10 @@ class InfoCommand(cog.Cog):
 		else:
 			await inter.edit_original_response(embed=embed)
 
-	@cog.slash_command(
-		name="support",
-		description=cog.Localised("Support the bot! please ;-;", key="support_desc"),
-	)
+	# @cog.slash_command(
+	# 	name="support",
+	# 	description=cog.Localised("Support the bot! please ;-;", key="support_desc"),
+	# )
 	async def support(self, inter: cog.ApplicationCommandInteraction):
 		await inter.response.defer()
 		sup = cog.Embed(

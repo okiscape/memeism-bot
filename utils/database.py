@@ -1,62 +1,31 @@
 import os
 
 import aiosqlite
-
 from utils.bot_logging import Logging
-from utils.types import Filter, FiltersGroup, Join
+from utils.types import Filter, FiltersGroup, Join, AsyncLRUTTLCache, MembershipRecord, SocialRatingRecord
 
-log = Logging()
+logging = Logging()
 
-SCHEMA_SQL = """
-CREATE TABLE IF NOT EXISTS server_settings (
-	guild_id INTEGER NOT NULL PRIMARY KEY,
-	average_language TEXT,
-	bad_words TEXT,
-	notified_moderators TEXT,
-	notify_channel INTEGER,
-	bad_action TEXT,
-	notify_text TEXT,
-	join_channel INTEGER,
-	leave_channel INTEGER,
-	post_channel INTEGER,
-	mute_role INTEGER,
-	auto_role INTEGER,
-	log_channel INTEGER,
-	verified_role INTEGER,
-	ticket_category INTEGER,
-	custom_fare TEXT,
-	fare_color TEXT,
-	fare_image TEXT,
-	custom_greet TEXT,
-	greet_color TEXT,
-	greet_image TEXT
-);
-
-CREATE TABLE IF NOT EXISTS social_rating (
-	user_id INTEGER NOT NULL PRIMARY KEY,
-	rating INTEGER NOT NULL DEFAULT 0
-);
-"""
-
-db_scheme = {
+db_schema = {
   "user_setting": {
-      ""
+      "user_id": "INTEGER PRIMARY KEY",
+      "timezone": "TEXT",
+      "osu_username": "TEXT"
   },
   "membership": {
-    "user_id": "INTEGER NOT NULL",
-    "sub_type": "TEXT",
+    "user_id": "INTEGER PRIMARY KEY",
     "about_me": "TEXT",
     "color": "TEXT",
-    "custom_image": "TEXT"
+    "custom_image": "TEXT",
+    "is_active": "INTEGER NOT NULL DEFAULT 1"
   },
   "server_settings": {
-      "guild_id": "INTEGER NOT NULL",
+      "guild_id": "INTEGER PRIMARY KEY",
       "average_language": "TEXT",
       "bad_words": "TEXT", # INT,INT,INT,
       "notified_moderators": "TEXT",
       "notify_channel": "INTEGER",
-      "bad_action": "TEXT",
-      "notify_text": "TEXT",
+      "bad_words_action": "TEXT",
       "join_channel": "INTEGER",
       "leave_channel": "INTEGER",
       "post_channel": "INTEGER",
@@ -65,16 +34,16 @@ db_scheme = {
       "log_channel": "INTEGER",
       "verified_role": "INTEGER",
       "ticket_category": "INTEGER",
-      "custom_fare": "TEXT",
+      "fare_text": "TEXT",
       "fare_color": "TEXT",
       "fare_image": "TEXT",
-      "custom_greet": "TEXT",
+      "fare_text": "TEXT",
       "greet_color": "TEXT",
       "greet_image": "TEXT"
   },
   "social_rating": {
-      "user_id": "INTEGER NOT NULL PRIMARY KEY",
-      "rating": "INTEGER NOT NULL"
+      "user_id": "INTEGER PRIMARY KEY",
+      "rating": "INTEGER DEFAULT 0"
   },
   "serververse": {
       "guild_id2": "INTEGER NOT NULL",
@@ -84,16 +53,44 @@ db_scheme = {
   }
 }
 # { table: {column-name: column-type} }
-# todo: create script to create db using this 
 
+class DbQueryReturn:
+  def __init__(self, cur, fetchone, fetchall):
+    self.cur = cur
+    self.fetchone: tuple = fetchone
+    self.fetchall: tuple = fetchall
 
 class BasicDBManager:
   def __init__(self, db_path: str):
     self.db_path = db_path
     self.connection: aiosqlite.Connection = ...
 
-  async def create(self, table: str, data: dict):
-      self.logging.log(f"Start dbm.create for {table}", 
+  async def connect(self) -> None:
+    self.connection = await aiosqlite.connect(self.db_path)
+
+  async def execute(self, query: str, *params, no_fetch: bool = False):
+    ftdquery = " ".join([line.strip() for line in query.splitlines()]).strip()
+
+    logging.info("db internal", f"Query: \"{ftdquery}\"", f"Params: {params}", type="DB")
+    fetch = await self.connection.execute(query, *params)
+    await self.connection.commit()
+    fetchall = await fetch.fetchall()
+
+    if fetchall != []:
+        fetchone = fetchall[0]
+    else: 
+        fetchone = None
+
+    logging.info("Fetchall", fetchall, type="DB")
+    logging.info("Fetchone", fetchone, type="DB")
+    
+    if not no_fetch:
+      return DbQueryReturn(fetch, 
+                  fetchone,
+                  fetchall)
+
+  async def create(self, table: str, **data: dict):
+      self.logging.log("db internal", f"Start create for {table}", 
           ", ".join([f"{k}: {v}" for k,v in data.items()]),
           type="pos")
 
@@ -109,7 +106,7 @@ INSERT INTO {table}
 VALUES
   ({", ".join(placeholders)})
   """
-      await self.execute(query, values)
+      await self.execute(query, values, no_fetch=True)
 
   def generateWhereClauses(self,
                           filters: list[Filter] | list[FiltersGroup]):
@@ -397,10 +394,10 @@ FROM {table}
 
 {key: newValue}"""
 
-      self.bot.log(f"Start dbm.update for {table}", 
-          f'filters: {[f"{filter.column}={filter.value}" for filter in filters]}',
-          f"updates: {updates}",
-          type="pos")
+      logging.info("db internal", f"Start update for {table}", 
+        f'filters: {[f"{filter.column}={filter.value}" for filter in filters]}',
+        f"updates: {updates}",
+        type="pos")
       updates = {k: (1 if v else 0) if isinstance(v, bool) else v for k, v in updates.items()}
       
       set_parts = []
@@ -430,49 +427,191 @@ UPDATE {table}
 SET {", ".join(set_parts)}
 WHERE {' AND '.join(where_clauses)}
 """
-      await self.execute(query, params)
+      await self.execute(query, params, no_fetch=True)
 
   async def delete(self, table: str, filters: list[Filter] | list[FiltersGroup]):
-      self.bot.log(f"Start dbm.delete from {table}",
-          f"Filters: {
-              [filter.__dict__ for filter in filters]
-          }",
-          type="pos")
-      where_clauses, params = self.generateWhereClauses(filters)
+    logging.info("db internal", f"Start delete from {table}",
+        f"Filters: {
+            [filter.__dict__ for filter in filters]
+        }",
+        type="pos")
+    where_clauses, params = self.generateWhereClauses(filters)
 
-      query = f"""
+    query = f"""
 DELETE FROM {table}
 WHERE {' AND '.join(where_clauses)}
 """
-      await self.execute(query, tuple(a for a in params))
+    await self.execute(query, tuple(a for a in params), no_fetch=True)
     
 
+class Caches:
+  def __init__(self):
+    self.cacheSettings = {
+        "long": {
+            "maxsize": 1024,
+            "ttl": 3600
+        },
+        "mid": {
+            "maxsize": 1024,
+            "ttl": 450
+        },
+        "short": {
+            "maxsize": 1024,
+            "ttl": 150
+        }
+    }
+    self.serverSettings = AsyncLRUTTLCache(self.cacheSettings["long"])
+    self.serververse = AsyncLRUTTLCache(self.cacheSettings["long"])
+    self.socialRating = AsyncLRUTTLCache(self.cacheSettings["short"])
+    self.membership = AsyncLRUTTLCache(self.cacheSettings["mid"])
+    self.userSetting = AsyncLRUTTLCache(self.cacheSettings["mid"])
+
 class DatabaseManager:
-	def __init__(self, db_path: str):
-		self.db_path = db_path
-		self.db = BasicDBManager(db_path)
+  def __init__(self, db_path: str):
+    self.db_path = db_path
+    self.db = BasicDBManager(db_path)
+          
+    self.caches = Caches()
 
-	def _ensure_db_dir(self) -> None:
-		parent = os.path.dirname(os.path.abspath(self.db_path))
-		if parent:
-			os.makedirs(parent, exist_ok=True)
+  def _ensure_db_dir(self) -> None:
+    parent = os.path.dirname(os.path.abspath(self.db_path))
+    if parent:
+      os.makedirs(parent, exist_ok=True)
 
-	async def init_schema(self) -> None:
-		self._ensure_db_dir()
-		async with aiosqlite.connect(self.db_path) as conn:
-			await conn.executescript(SCHEMA_SQL)
-			await conn.commit()
-		log.info("database", "schema ready", self.db_path)
+  async def init_schema(self) -> None:
+    await self.db.connect()
+    self._ensure_db_dir()
 
-	async def sql_fetchone(self, sql: str, params: tuple = ()):
-		self._ensure_db_dir()
-		async with aiosqlite.connect(self.db_path) as conn:
-			async with conn.execute(sql, params) as cur:
-				return await cur.fetchone()
+    cmds = []
+    for table_name in db_schema:
+      table = db_schema[table_name]
+      columns = []
+      for column_name in table:
+        columns.append(f"{column_name} {table[column_name]}")
+        
+      cmds.append(f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(columns)})")
 
-	async def sql_execute(self, sql: str, params: tuple = ()):
-		self._ensure_db_dir()
-		async with aiosqlite.connect(self.db_path) as conn:
-			await conn.execute(sql, params)
-			await conn.commit()
+    for cmd in cmds:
+      await self.db.execute(cmd)
+    logging.info("schema ready", self.db_path, type="DB")
+
+  async def _getCached(self, store: AsyncLRUTTLCache, key: str):
+    try:
+        cached = await store.get(key)
+    except Exception:
+        cached = None
+    
+    if cached is not None:
+        return cached
+    return None
+
   
+  async def readMembership(self, 
+      user_id: int = None,
+      limit: int = 10, 
+      offset: int = 0,
+      orderBy: str = None,
+      orderDir: str = "DESC",
+      cacheOverwrite: bool = False) -> list[SocialRatingRecord]:
+    
+    _cachekey = f"{user_id};{limit};{offset};{orderBy};{orderDir}"
+    if not cacheOverwrite:
+      cached = await self._getCached(
+        store=self.caches.socialRating,
+        key=_cachekey
+      )
+      if cached:
+        return cached
+    filters = []
+    if user_id:
+       filters.append(Filter("user_id", user_id))
+
+    fetch = (await self.db.read(
+      table="membership",
+      columns=[
+        "user_id",
+        "about_me",
+        "color",
+        "custom_image",
+        "is_active"
+      ],
+      filters=filters
+    )).fetchall
+    
+    to_return: list[SocialRatingRecord] = []
+
+    for row in fetch:
+       to_return.append(
+          MembershipRecord(
+             # TODO
+          )
+       )
+    
+    await self.caches.socialRating.set(
+      _cachekey,
+      to_return
+    )
+
+    return to_return
+
+
+  async def updateSocialRating(self, user_id: int, to_rating: int):
+    await self.db.update(
+      table="social_rating",
+      filters=[
+         Filter("user_id", user_id)
+      ],
+      rating=to_rating
+    )
+
+  async def createSocialRating(self, user_id: int, to_rating: int):
+    await self.db.create(
+      table="social_rating",
+      user_id=user_id, rating=to_rating
+    )
+  
+  async def readSocialRating(self, 
+      user_id: int = None, 
+      limit: int = 10, 
+      offset: int = 0,
+      orderBy: str = None,
+      orderDir: str = "DESC",
+      cacheOverwrite: bool = False) -> list[SocialRatingRecord]:
+    
+    _cachekey = f"{user_id};{limit};{offset};{orderBy};{orderDir}"
+    if not cacheOverwrite:
+      cached = await self._getCached(
+        store=self.caches.socialRating,
+        key=_cachekey
+      )
+      if cached:
+        return cached
+    filters = []
+    if user_id:
+       filters.append(Filter("user_id", user_id))
+
+    fetch = (await self.db.read(
+      table="social_rating",
+      columns=[
+         "user_id",
+         "rating"
+      ],
+      filters=filters
+    )).fetchall
+    
+    to_return: list[SocialRatingRecord] = []
+
+    for row in fetch:
+       to_return.append(
+          SocialRatingRecord(
+             user_id=row[0],
+             rating=row[1]
+          )
+       )
+    
+    await self.caches.socialRating.set(
+      _cachekey,
+      to_return
+    )
+
+    return to_return

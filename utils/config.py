@@ -44,7 +44,6 @@ feedback_channel_id = _int("FEEDBACK_CHANNEL_ID")
 feedback_ping_user_id = _int("FEEDBACK_PING_USER_ID")
 
 support_invite_url = env.get("SUPPORT_INVITE_URL") or "https://discord.gg"
-donation_url = env.get("DONATION_URL") or ""
 
 version_name = env.get("BOT_VERSION_NAME") or "memeism"
 version_number = env.get("BOT_VERSION_NUMBER") or "0.1"
@@ -54,20 +53,3 @@ gray = 0x2F3136  # Mitsuki colors.gray
 pastel_red = 0xDB553F
 spotify_main = 0x1ED760  # Mitsuki — эмбеды ролей/категорий сервера
 boticord_blue = 0x24ADF3  # Mitsuki Boticord-эмбед
-
-support_boticord_bot_id = _int("BOTICORD_BOT_ID")
-
-# Оформление эмбедов в духе Mitsuki (CDN)
-embed_err_thumb = (
-	"https://cdn.discordapp.com/attachments/1025520858493632532/1114566953344958494/-1.png"
-)
-embed_err_banner = (
-	"https://cdn.discordapp.com/attachments/1025520858493632532/1114659932747337750/-3.png"
-)
-embed_panel_strip = (
-	"https://cdn.discordapp.com/attachments/1025520858493632532/1114661801624350810/-4.png"
-)
-embed_success_banner = embed_panel_strip
-embed_error_small = embed_err_banner
-# Баннер под эмбедом отзыва (как image_error_small_blured в Mitsuki)
-embed_feedback_footer = embed_panel_strip

@@ -31,65 +31,65 @@ class Logging:
 		self.warn = self.warning
 		self.log = self.info
 	
-	def info(self, label: str, *kwargs):
-		"""%Y-%m-%d %H:%M:%S | INFO | {label} | {kwargs} | {kwargs} | {kwargs}..."""
+	def info(self, *kwargs, type: str):
+		"""%Y-%m-%d %H:%M:%S | INFO | {type} | {kwargs} | {kwargs} | {kwargs}..."""
 		now = shortcuts.now_datetime()
 		messages = []
 		for arg in kwargs:
-			messages.append(arg)
+			messages.append(str(arg))
 
-		print(f'{now.strftime("%Y-%m-%d %H:%M:%S |")} INFO | {label.upper()} | {" | ".join(messages)}')
+		print(f'{now.strftime("%Y-%m-%d %H:%M:%S |")} INFO | {type.upper()} | {" | ".join(messages)}')
 
-		main_logger.info(f'{label} | {" | ".join(messages)}')
+		main_logger.info(f'{type} | {" | ".join(messages)}')
 	
-	def warning(self, label: str, *kwargs):
-		"""%Y-%m-%d %H:%M:%S | WARNING | {label} | {kwargs} | {kwargs} | {kwargs}..."""
+	def warning(self, *kwargs, type: str):
+		"""%Y-%m-%d %H:%M:%S | WARNING | {type} | {kwargs} | {kwargs} | {kwargs}..."""
 		now = shortcuts.now_datetime()
 		messages = []
-		for arg in kwargs: messages.append(arg)
-		print(f'{now.strftime("%Y-%m-%d %H:%M:%S |")} INFO | {label.upper()} | {" | ".join(messages)}')
-		main_logger.warning(f'{label} | {" | ".join(messages)}')
+		for arg in kwargs: messages.append(str(arg))
+		print(f'{now.strftime("%Y-%m-%d %H:%M:%S |")} INFO | {type.upper()} | {" | ".join(messages)}')
+		main_logger.warning(f'{type} | {" | ".join(messages)}')
 
-	def debug(self, label: str, *kwargs):
-		"""%Y-%m-%d %H:%M:%S | DEBUG | {label} | {kwargs} | {kwargs} | {kwargs}..."""
+	def debug(self, *kwargs, type: str):
+		"""%Y-%m-%d %H:%M:%S | DEBUG | {type} | {kwargs} | {kwargs} | {kwargs}..."""
 		now = shortcuts.now_datetime()
 		messages = []
 		for arg in kwargs:
-			messages.append(arg)
+			messages.append(str(arg))
 
-		print(f'{now.strftime("%Y-%m-%d %H:%M:%S |")} DEBUG | {label.upper()} | {" | ".join(messages)}')
+		print(f'{now.strftime("%Y-%m-%d %H:%M:%S |")} DEBUG | {type.upper()} | {" | ".join(messages)}')
 
-		main_logger.debug(f'{label} | {" | ".join(messages)}')
+		main_logger.debug(f'{type} | {" | ".join(messages)}')
 	
-	def error(self, label: str, *kwargs):
-		"""%Y-%m-%d %H:%M:%S | ERROR | {label} | {kwargs} | {kwargs} | {kwargs}..."""
+	def error(self, *kwargs, type: str):
+		"""%Y-%m-%d %H:%M:%S | ERROR | {type} | {kwargs} | {kwargs} | {kwargs}..."""
 		now = shortcuts.now_datetime()
 		messages = []
 		for arg in kwargs:
-			messages.append(arg)
+			messages.append(str(arg))
 		
-		print(f'{now.strftime("%Y-%m-%d %H:%M:%S |")} ERROR | {label.upper()} | {" | ".join(messages)}')
+		print(f'{now.strftime("%Y-%m-%d %H:%M:%S |")} ERROR | {type.upper()} | {" | ".join(messages)}')
 
-		main_logger.error(f'{label} | {" | ".join(messages)}')
+		main_logger.error(f'{type} | {" | ".join(messages)}')
 
-	def fatal(self, label: str, *kwargs):
-		"""%Y-%m-%d %H:%M:%S | FATAL | {label} | {kwargs} | {kwargs} | {kwargs}..."""
+	def fatal(self, *kwargs, type: str):
+		"""%Y-%m-%d %H:%M:%S | FATAL | {type} | {kwargs} | {kwargs} | {kwargs}..."""
 		now = shortcuts.now_datetime()
 		messages = []
 		for arg in kwargs:
-			messages.append(arg)
+			messages.append(str(arg))
 		
-		print(f'{now.strftime("%Y-%m-%d %H:%M:%S |")} FATAL | {label.upper()} | {" | ".join(messages)}')
+		print(f'{now.strftime("%Y-%m-%d %H:%M:%S |")} FATAL | {type.upper()} | {" | ".join(messages)}')
 
-		main_logger.fatal(f'{label} | {" | ".join(messages)}')
+		main_logger.fatal(f'{type} | {" | ".join(messages)}')
 	
-	def critical(self, label: str, *kwargs):
-		"""%Y-%m-%d %H:%M:%S | CRITICAL | {label} | {kwargs} | {kwargs} | {kwargs}..."""
+	def critical(self, *kwargs, type: str):
+		"""%Y-%m-%d %H:%M:%S | CRITICAL | {type} | {kwargs} | {kwargs} | {kwargs}..."""
 		now = shortcuts.now_datetime()
 		messages = []
 		for arg in kwargs:
-			messages.append(arg)
+			messages.append(str(arg))
 		
-		print(f'{now.strftime("%Y-%m-%d %H:%M:%S |")} CRITICAL | {label.upper()} | {" | ".join(messages)}')
+		print(f'{now.strftime("%Y-%m-%d %H:%M:%S |")} CRITICAL | {type.upper()} | {" | ".join(messages)}')
 
-		main_logger.critical(f'{label} | {" | ".join(messages)}')
+		main_logger.critical(f'{type} | {" | ".join(messages)}')

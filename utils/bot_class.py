@@ -32,7 +32,7 @@ class MemeismBot(InteractionBot):
     await self.database.init_schema()
   
   def run_bot(self):
-    self.logging.info("client", "STARTING")
+    self.logging.info("Starting...", type="gateway")
     self.run(self.config.bot_token)
 
   def dictFormat(self, data, indent=0, indent_str='| '):
@@ -57,7 +57,8 @@ class MemeismBot(InteractionBot):
     return result
 
   async def on_ready(self):
-    self.logging.info("client","READY")
+    self.logging.info("Ready", type="gateway")
+    await self.setup_hook()
     self.loaded_cogs = self.cogs
     loaded = {}
     for name in self.cogs:
@@ -72,19 +73,19 @@ class MemeismBot(InteractionBot):
     self.loaded_cogs_formatted = self.dictFormat(loaded)
   
   async def on_disconnect(self):
-    self.logging.warning("client","DISCONNECT")
+    self.logging.warning("Disconnected", type="gateway")
 
   async def on_connect(self):
-    self.logging.info("client","CONNECT")
+    self.logging.info("Connected", type="gateway")
 
   def cog_reload(self, __name__):
     """Уведомление о перезагрузке кога
     reload=True"""
-    self.logging.debug("modules", "RELOAD", __name__)
+    self.logging.debug("Cog reloaded", __name__, type="cogs")
 
   def cog_load(self, cogs: list[str]):
-    self.logging.info("client", "LOAD COGS")
+    self.logging.info("Cogs loading start...", type="cogs")
 
     for cog in cogs:
-      self.logging.info("COGS", f"Cog ({cog}) load")
+      self.logging.info(f"Cog ({cog}) load", type="cogs")
       self.load_extension(cog)

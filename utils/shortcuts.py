@@ -82,7 +82,7 @@ async def tbc(inter: disnake.ApplicationCommandInteraction, text: str, do_not_tr
 				
 		elif translate_type == "guild":
 			cur = await get_cursor()
-			cur.execute(f"SELECT * FROM `setting` WHERE `guild_id` = {inter.guild_id}")
+			cur.execute(f"SELECT * FROM `server_settings` WHERE `guild_id` = {inter.guild_id}")
 			server_language = cur.fetchone()
 			try:
 				translated = googletrans.Translator().translate(text, server_language)
@@ -106,7 +106,7 @@ async def tbc(inter: disnake.ApplicationCommandInteraction, text: str, do_not_tr
 					
 			elif translate_type == "guild":
 				cur = await get_cursor()
-				cur.execute(f"SELECT * FROM `setting` WHERE `guild_id` = {inter.guild_id}")
+				cur.execute(f"SELECT * FROM `server_settings` WHERE `guild_id` = {inter.guild_id}")
 				server_language = cur.fetchone()
 				try:
 					translated = googletrans.Translator().translate(text, server_language)
