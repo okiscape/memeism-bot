@@ -92,3 +92,46 @@ class MembershipRecord:
     self.about_me = about_me
     self.color = color
     self.custom_image = custom_image
+		
+class ServerSettingsRecord:
+  def __init__(self,
+      guild_id: int,
+      average_language: str,
+      bad_words: str,
+      notified_moderators: str,
+      notify_channel: int,
+      bad_words_action: str,
+      join_channel: int,
+      leave_channel: int,
+      post_channel: int,
+      mute_role: int,
+      auto_role: int,
+      log_channel: int,
+      verified_role: int,
+      ticket_category: int,
+      fare_text: str,
+      fare_color: str,
+      fare_image: str,
+      greet_text: str,
+      greet_color: str,
+      greet_image: str):
+    self.guild_id = guild_id
+    self.average_language = average_language
+    self.bad_words = bad_words
+    self.notified_moderators = notified_moderators
+    self.notify_channel = notify_channel
+    self.bad_words_action = bad_words_action
+    self.join_channel = join_channel
+    self.leave_channel = leave_channel
+    self.post_channel = post_channel
+    self.mute_role = mute_role
+    self.auto_role = auto_role
+    self.log_channel = log_channel
+    self.verified_role = verified_role
+    self.ticket_category = ticket_category
+    self.fare_text = fare_text
+    self.fare_color = fare_color
+    self.fare_image = fare_image
+    self.greet_text = greet_text
+    self.greet_color = greet_color
+    self.greet_image = greet_image

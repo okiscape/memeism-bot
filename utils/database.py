@@ -2,7 +2,7 @@ import os
 
 import aiosqlite
 from utils.bot_logging import Logging
-from utils.types import Filter, FiltersGroup, Join, AsyncLRUTTLCache, MembershipRecord, SocialRatingRecord
+from utils.types import Filter, FiltersGroup, Join, AsyncLRUTTLCache, MembershipRecord, ServerSettingsRecord, SocialRatingRecord
 
 logging = Logging()
 
@@ -37,7 +37,7 @@ db_schema = {
       "fare_text": "TEXT",
       "fare_color": "TEXT",
       "fare_image": "TEXT",
-      "fare_text": "TEXT",
+      "greet_text": "TEXT",
       "greet_color": "TEXT",
       "greet_image": "TEXT"
   },
@@ -554,6 +554,7 @@ class DatabaseManager:
 
     return to_return
 
+  # todo: readServerSettings
 
   async def updateSocialRating(self, user_id: int, to_rating: int):
     await self.db.update(
