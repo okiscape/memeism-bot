@@ -42,6 +42,13 @@ db_scheme = {
   "user_setting": {
       ""
   },
+  "membership": {
+    "user_id": "INTEGER NOT NULL",
+    "sub_type": "TEXT",
+    "about_me": "TEXT",
+    "color": "TEXT",
+    "custom_image": "TEXT"
+  },
   "server_settings": {
       "guild_id": "INTEGER NOT NULL",
       "average_language": "TEXT",
@@ -63,9 +70,20 @@ db_scheme = {
       "fare_image": "TEXT",
       "custom_greet": "TEXT",
       "greet_color": "TEXT",
-      "greet_image": "TEXT",
+      "greet_image": "TEXT"
+  },
+  "social_rating": {
+      "user_id": "INTEGER NOT NULL PRIMARY KEY",
+      "rating": "INTEGER NOT NULL"
+  },
+  "serververse": {
+      "guild_id2": "INTEGER NOT NULL",
+      "channel2": "INTEGER NOT NULL",
+      "guild_id1": "INTEGER NOT NULL",
+      "channel1": "INTEGER NOT NULL"
   }
 }
+# { table: {column-name: column-type} }
 # todo: create script to create db using this 
 
 
