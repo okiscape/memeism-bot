@@ -71,6 +71,7 @@ from disnake.ext.commands import (Cog as disnake_cog,
 								  BucketType,
 								  has_permissions,
 								  errors)
+from disnake.flags import InteractionContextTypes
 
 event = disnake_cog.listener
 listener = disnake_cog.listener
@@ -238,6 +239,7 @@ class Cog(disnake_cog):
 			dm_permission: Optional[bool] = False,
 			default_member_permissions: Optional[Union[Permissions, int]] = None,
 			nsfw: Optional[bool] = None,
+			contexts: Optional[InteractionContextTypes] = None,
 			options: Optional[List[Option]] = None,
 			guild_ids: Optional[Sequence[int]] = None,
 			connectors: Optional[Dict[str, str]] = None,
@@ -245,8 +247,16 @@ class Cog(disnake_cog):
 			extras: Optional[Dict[str, Any]] = None,
 			**kwargs,
 	) -> Callable[[CommandCallback], InvokableSlashCommand]:
+		eff_ctx = contexts
+		eff_dm = dm_permission
+		if eff_ctx is None and dm_permission is False:
+			eff_ctx = InteractionContextTypes(guild=True)
+			eff_dm = None
+		elif eff_ctx is not None:
+			eff_dm = None
 		return slash_command(                                 # type: ignore
-			name=name, description=description, dm_permission=dm_permission,
+			name=name, description=description, dm_permission=eff_dm,
 			default_member_permissions=default_member_permissions, nsfw=nsfw,
+			contexts=eff_ctx,
 			options=options, guild_ids=guild_ids, connectors=connectors,
 			auto_sync=auto_sync, extras=extras, **kwargs)

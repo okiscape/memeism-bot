@@ -1,8 +1,42 @@
+import os
+
 import aiosqlite
+
 from utils.bot_logging import Logging
 from utils.types import Filter, FiltersGroup, Join
 
 log = Logging()
+
+SCHEMA_SQL = """
+CREATE TABLE IF NOT EXISTS server_settings (
+	guild_id INTEGER NOT NULL PRIMARY KEY,
+	average_language TEXT,
+	bad_words TEXT,
+	notified_moderators TEXT,
+	notify_channel INTEGER,
+	bad_action TEXT,
+	notify_text TEXT,
+	join_channel INTEGER,
+	leave_channel INTEGER,
+	post_channel INTEGER,
+	mute_role INTEGER,
+	auto_role INTEGER,
+	log_channel INTEGER,
+	verified_role INTEGER,
+	ticket_category INTEGER,
+	custom_fare TEXT,
+	fare_color TEXT,
+	fare_image TEXT,
+	custom_greet TEXT,
+	greet_color TEXT,
+	greet_image TEXT
+);
+
+CREATE TABLE IF NOT EXISTS social_rating (
+	user_id INTEGER NOT NULL PRIMARY KEY,
+	rating INTEGER NOT NULL DEFAULT 0
+);
+"""
 
 db_scheme = {
   "user_setting": {
@@ -396,6 +430,31 @@ WHERE {' AND '.join(where_clauses)}
     
 
 class DatabaseManager:
-  def __init__(self, db_path: str):
-    self.db = BasicDBManager(db_path)
+	def __init__(self, db_path: str):
+		self.db_path = db_path
+		self.db = BasicDBManager(db_path)
+
+	def _ensure_db_dir(self) -> None:
+		parent = os.path.dirname(os.path.abspath(self.db_path))
+		if parent:
+			os.makedirs(parent, exist_ok=True)
+
+	async def init_schema(self) -> None:
+		self._ensure_db_dir()
+		async with aiosqlite.connect(self.db_path) as conn:
+			await conn.executescript(SCHEMA_SQL)
+			await conn.commit()
+		log.info("database", "schema ready", self.db_path)
+
+	async def sql_fetchone(self, sql: str, params: tuple = ()):
+		self._ensure_db_dir()
+		async with aiosqlite.connect(self.db_path) as conn:
+			async with conn.execute(sql, params) as cur:
+				return await cur.fetchone()
+
+	async def sql_execute(self, sql: str, params: tuple = ()):
+		self._ensure_db_dir()
+		async with aiosqlite.connect(self.db_path) as conn:
+			await conn.execute(sql, params)
+			await conn.commit()
   

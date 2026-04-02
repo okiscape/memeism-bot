@@ -1,6 +1,6 @@
 import disnake
 from disnake.ext.commands import InteractionBot, Cog
-from utils import config, bot_logging, database
+from utils import config, bot_logging, database, shortcuts, emojis
 
 
 class MemeismBot(InteractionBot):
@@ -13,17 +13,22 @@ class MemeismBot(InteractionBot):
     self.loaded_cogs_formatted = None
     self.logging = bot_logging.Logging()
     self.database = database.DatabaseManager(config.db_path)
-    
+    self.shortcuts = shortcuts
+    self.custom_emojis = emojis
+
     intents = disnake.Intents.all()
 
     super().__init__(reload=True, 
       status=disnake.Status.dnd, 
       intents=intents,
       enable_debug_events=True,
-      proxy=config.proxy_url
+      proxy=config.proxy_url,
     )
     self.cog_load(cogs)
     self.run_bot()
+
+  async def setup_hook(self):
+    await self.database.init_schema()
   
   def run_bot(self):
     self.logging.info("client", "STARTING")
