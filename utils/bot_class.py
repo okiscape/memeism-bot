@@ -16,8 +16,9 @@ class MemeismBot(InteractionBot):
     
     intents = disnake.Intents.all()
 
-    super().__init__(reload=True, 
-      status=disnake.Status.dnd, 
+    super().__init__(
+      reload=True, 
+      status=disnake.Status.online, 
       intents=intents,
       enable_debug_events=True,
       proxy=config.proxy_url

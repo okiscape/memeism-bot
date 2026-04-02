@@ -1,0 +1,4 @@
+disnake
+dotenv
+aiosqlite
+googletrans

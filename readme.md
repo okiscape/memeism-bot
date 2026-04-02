@@ -4,4 +4,5 @@
 **.env scheme**
 ```env
 BOT_TOKEN=...
-PROXY_URL=...```
+PROXY_URL=...
+```
