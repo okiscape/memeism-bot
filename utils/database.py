@@ -2,7 +2,7 @@ import os
 
 import aiosqlite
 from utils.bot_logging import Logging
-from utils.types import Filter, FiltersGroup, Join, AsyncLRUTTLCache, MembershipRecord, ServerSettingsRecord, SocialRatingRecord
+from utils.types import Filter, FiltersGroup, Join, AsyncLRUTTLCache, MembershipRecord, ServerSettingsRecord, SerververseRecord, SocialRatingRecord
 
 logging = Logging()
 
@@ -47,9 +47,9 @@ db_schema = {
   },
   "serververse": {
       "guild_id2": "INTEGER NOT NULL",
-      "channel2": "INTEGER NOT NULL",
+      "channel_id2": "INTEGER NOT NULL",
       "guild_id1": "INTEGER NOT NULL",
-      "channel1": "INTEGER NOT NULL"
+      "channel_id1": "INTEGER NOT NULL"
   }
 }
 # { table: {column-name: column-type} }
@@ -261,7 +261,7 @@ VALUES
       table: str,
       columns: list[str], 
       joins: list[Join] = [],
-      filters: list[Filter] = [],
+      filters: list[Filter] | list[FiltersGroup] = [],
       orderBy: str = None,
       orderDir: str = "DESC",
       limit: int = -1,
@@ -555,6 +555,161 @@ class DatabaseManager:
     return to_return
 
   # todo: readServerSettings
+
+
+  async def createSerververse(self, 
+      guild_id1: int,
+      channel1: int,
+      guild_id2: int,
+      channel2: int,):
+    await self.db.create(
+      table="serververse",
+
+      guild_id1=guild_id1,
+      guild_id2=guild_id2,
+      channel1=channel1,
+      channel2=channel2,
+    )
+
+  async def readSerververse(self, 
+      guild_id: int, 
+      channel_id: int,
+      limit: int = 10, 
+      offset: int = 0,
+      orderBy: str = None,
+      orderDir: str = "DESC",
+      cacheOverwrite: bool = False) -> list[SerververseRecord]:
+    
+    _cachekey = f"{guild_id};{channel_id};{limit};{offset};{orderBy};{orderDir}"
+    if not cacheOverwrite:
+      cached = await self._getCached(
+        store=self.caches.serververse,
+        key=_cachekey
+      )
+      if cached:
+        return cached
+
+    fetch = (await self.db.read(
+      table="server_settings",
+      columns=[
+        "guild_id1",
+        "channel_id1",
+        "guild_id2",
+        "channel_id2"
+      ],
+      filters=[
+        FiltersGroup("OR", [
+          Filter("guild_id1", guild_id),
+          Filter("guild_id2", guild_id)
+        ]), 
+        FiltersGroup("OR", [
+          Filter("channel_id1", channel_id),
+          Filter("channel_id2", channel_id)
+        ])
+      ]
+    )).fetchall
+    
+    to_return: list[ServerSettingsRecord] = []
+
+    for row in fetch:
+       to_return.append(
+          SerververseRecord(
+            guild_id1=row[0],
+            channel_id1=row[1],
+            guild_id2=row[2],
+            channel_id2=row[3]
+          )
+       )
+    
+    await self.caches.serverSettings.set(
+      _cachekey,
+      to_return
+    )
+
+    return to_return
+
+
+  async def readServerSettings(self, guild_id: int, 
+      limit: int = 10, 
+      offset: int = 0,
+      orderBy: str = None,
+      orderDir: str = "DESC",
+      cacheOverwrite: bool = False) -> list[ServerSettingsRecord]:
+    
+    _cachekey = f"{guild_id};{limit};{offset};{orderBy};{orderDir}"
+    if not cacheOverwrite:
+      cached = await self._getCached(
+        store=self.caches.serverSettings,
+        key=_cachekey
+      )
+      if cached:
+        return cached
+    filters = []
+    if guild_id:
+       filters.append(Filter("guild_id", guild_id))
+
+    fetch = (await self.db.read(
+      table="server_settings",
+      columns=[
+        "guild_id",
+        "average_language",
+        "bad_words",
+        "notified_moderators",
+        "notify_channel",
+        "bad_words_action",
+        "join_channel",
+        "leave_channel",
+        "post_channel",
+        "mute_role",
+        "auto_role",
+        "log_channel",
+        "verified_role",
+        "ticket_category",
+        "fare_text",
+        "fare_color",
+        "fare_image",
+        "greet_text",
+        "greet_color",
+        "greet_image"
+      ],
+      filters=filters
+    )).fetchall
+    
+    to_return: list[ServerSettingsRecord] = []
+
+    for row in fetch:
+       to_return.append(
+          ServerSettingsRecord(
+            guild_id=row[0],
+            average_language=row[1],
+            bad_words=row[2],
+            notified_moderators=row[3],
+            notify_channel=row[4],
+            bad_words_action=row[5],
+            join_channel=row[6],
+            leave_channel=row[7],
+            post_channel=row[8],
+            mute_role=row[9],
+            auto_role=row[10],
+            log_channel=row[11],
+            verified_role=row[12],
+            ticket_category=row[13],
+            fare_text=row[14],
+            fare_color=row[15],
+            fare_image=row[16],
+            greet_text=row[17],
+            greet_color=row[18],
+            greet_image=row[19],
+          )
+       )
+    
+    await self.caches.serverSettings.set(
+      _cachekey,
+      to_return
+    )
+
+    return to_return
+
 
   async def updateSocialRating(self, user_id: int, to_rating: int):
     await self.db.update(

@@ -93,6 +93,18 @@ class MembershipRecord:
     self.color = color
     self.custom_image = custom_image
 		
+class SerververseRecord:
+  def __init__(self, 
+      guild_id1: int,
+      channel_id1: int,
+      guild_id2: int,
+      channel_id2: int,
+    ):
+    self.guild_id1 = guild_id1
+    self.channel_id1 = channel_id1
+    self.guild_id2 = guild_id2
+    self.channel_id2 = channel_id2
+
 class ServerSettingsRecord:
   def __init__(self,
       guild_id: int,
@@ -118,7 +130,7 @@ class ServerSettingsRecord:
     self.guild_id = guild_id
     self.average_language = average_language
     self.bad_words = bad_words
-    self.notified_moderators = notified_moderators
+    self.notified_moderators: list[int] = notified_moderators.split(",")
     self.notify_channel = notify_channel
     self.bad_words_action = bad_words_action
     self.join_channel = join_channel
