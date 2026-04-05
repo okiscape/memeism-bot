@@ -66,7 +66,7 @@ class Feedback(cog.Cog):
 		sender_channel = self.bot.get_channel(config.feedback_channel_id)
 		if not sender_channel:
 			await inter.response.send_message(
-				await cog.shortcuts.tbc(inter, "Канал для отзывов не найден."),
+				await cog.sh.tbc(inter, "Канал для отзывов не найден."),
 				ephemeral=True,
 			)
 			return

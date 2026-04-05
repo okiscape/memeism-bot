@@ -1,0 +1,28 @@
+{
+  "profile.preview.meta.description": "See the preview of your profile",
+  "profile.preview.resp.content":"This is how your profile looks now:",
+  "profile.preview.resp.content.error":"Your profile is empty!\nUse /profile commands to fill it up and preview it here!",
+  "profile.preview.resp.edit_profile_button":"Edit my profile",
+
+  "profile.edit_modal.title":"Profile customization",
+  "profile.edit_modal.description":"Use \"-\" to reset any field",
+  "profile.edit_modal.color.title":"Color (in HEX format)",
+  "profile.edit_modal.color.placeholder":"FFFFFF",
+  "profile.edit_modal.about_me.title":"About me",
+  "profile.edit_modal.about_me.placeholder":"Markdown works too. All texts are moderated.",
+  "profile.edit_modal.image.title": "Banner",
+  "profile.edit_modal.image.placeholder": "Link to the image or GIF",
+
+  "profile.edit_modal.res.color_removed": "- Color removed",
+  "profile.edit_modal.res.color_changed": "+ Color updated to #{color}",
+
+  "profile.edit_modal.res.about_removed": "- \"About me\" removed",
+  "profile.edit_modal.res.about_updated": "+ \"About me\" updated",
+
+  "profile.edit_modal.res.image_removed": "- Banner removed",
+  "profile.edit_modal.res.image_updated": "+ Banner updated",
+
+  "profile.edit_modal.res.unknown_error": "Unknown error occured, profile updated.",
+  "profile.edit_modal.res.log_message": "Profile <@{user_id}> changed!\nID: `{user_id}`",
+  "profile.edti_modal.res.final_updates":"**Updates:**\n```diff\n{updates}\n```\n-# *Admins notified that you've updated your profile and can forcibly edit it.*"
+}

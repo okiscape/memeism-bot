@@ -37,7 +37,7 @@ class Rating(cog.Cog):
     
     color = 0x1ED860 if ratingRecord.rating > 0 else 0xDF4E4E
     embed = cog.Embed(
-      title=await cog.shortcuts.tbc(inter, f"Рейтинг {view.display_name}"),
+      title=await cog.sh.tbc(inter, f"Рейтинг {view.display_name}"),
       description=f"## {ratingRecord.rating}",
       color=color,
     ).set_thumbnail(url=view.display_avatar.url)
@@ -56,12 +56,12 @@ class Rating(cog.Cog):
     await inter.response.defer(ephemeral=True)
     if view == inter.author:
       await inter.edit_original_response(
-        await cog.shortcuts.tbc(inter, "Рейтинг самому себе повысить нельзя")
+        await cog.sh.tbc(inter, "Рейтинг самому себе повысить нельзя")
       )
       return
     if view.bot:
       await inter.edit_original_response(
-        await cog.shortcuts.tbc(inter, "Рейтинг ботов нельзя повышать")
+        await cog.sh.tbc(inter, "Рейтинг ботов нельзя повышать")
       )
       return
 
@@ -86,7 +86,7 @@ class Rating(cog.Cog):
 
     color = 0x1ED860 if newRating > 0 else 0xDF4E4E
     embed = cog.Embed(
-      title=await cog.shortcuts.tbc(inter, f"Рейтинг {view.display_name} повышен"),
+      title=await cog.sh.tbc(inter, f"Рейтинг {view.display_name} повышен"),
       description=f"## {ratingRecord.rating} => {newRating}",
       color=color,
     ).set_thumbnail(url=view.display_avatar.url)
@@ -107,12 +107,12 @@ class Rating(cog.Cog):
     blocked = {config.bot_owner_id} if config.bot_owner_id is not None else set()
     if view == inter.author or inter.author.id in blocked:
       await inter.edit_original_response(
-        await cog.shortcuts.tbc(inter, "Вам запрещено взаимодействовать с рейтингами!")
+        await cog.sh.tbc(inter, "Вам запрещено взаимодействовать с рейтингами!")
       )
       return
     if view.bot:
       await inter.edit_original_response(
-        await cog.shortcuts.tbc(inter, "Рейтинг ботов нельзя понижать")
+        await cog.sh.tbc(inter, "Рейтинг ботов нельзя понижать")
       )
       return
 
@@ -136,7 +136,7 @@ class Rating(cog.Cog):
 
     color = 0x1ED860 if newRating > 0 else 0xDF4E4E
     embed = cog.Embed(
-      title=await cog.shortcuts.tbc(inter, f"Рейтинг {view.display_name} понижен"),
+      title=await cog.sh.tbc(inter, f"Рейтинг {view.display_name} понижен"),
       description=f"## {ratingRecord.rating} => {newRating}",
       color=color,
     ).set_thumbnail(url=view.display_avatar.url)

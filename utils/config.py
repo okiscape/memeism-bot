@@ -42,14 +42,26 @@ bot_owner_id = _int("BOT_OWNER_ID")
 dev_guild_id = _int("DEV_GUILD_ID")
 feedback_channel_id = _int("FEEDBACK_CHANNEL_ID")
 feedback_ping_user_id = _int("FEEDBACK_PING_USER_ID")
+profile_edits_log_channel = _int("PROFILE_EDITS_CHANNEL_ID")
 
 support_invite_url = env.get("SUPPORT_INVITE_URL") or "https://discord.gg"
 
 version_name = env.get("BOT_VERSION_NAME") or "memeism"
 version_number = env.get("BOT_VERSION_NUMBER") or "0.1"
 
-accent_color = 0xECE5CF  # Mitsuki mitsuki_col
-gray = 0x2F3136  # Mitsuki colors.gray
-pastel_red = 0xDB553F
-spotify_main = 0x1ED760  # Mitsuki — эмбеды ролей/категорий сервера
-boticord_blue = 0x24ADF3  # Mitsuki Boticord-эмбед
+class colors:
+	spotify_main = 0x1ED760
+	blurple = 0x5665F4
+	pastel_yellow = 0xFFDC97
+	pastel_red = 0xED4245
+	mitsuki_col = 0xECE5CF
+	success = 0xA3E77F
+	gray = 0x2f3136
+	deny = 0xcc0000
+	osu_main = 0xfb65a7
+	osu_second = 0xe27496
+	light_blue = 0x7abdd5
+	light_pink = 0xffacd0
+	boticord = 0x24aef3
+	beige = 0xfdeddc
+	verification = 0xa2a1fc

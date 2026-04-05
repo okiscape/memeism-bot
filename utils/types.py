@@ -86,8 +86,14 @@ class SocialRatingRecord:
     self.user_id = user_id
     self.rating = rating
 	
-class MembershipRecord:
-  def __init__(self, user_id: int, about_me: str, color: int, custom_image: str):
+class UserSettingsRecord:
+  def __init__(self, user_id: int, timezone: str | None, osu_username: str | None):
+    self.user_id = user_id
+    self.timezone = timezone
+    self.osu_username = osu_username
+
+class UserProfileRecord:
+  def __init__(self, user_id: int, about_me: str, color: str, custom_image: str):
     self.user_id = user_id
     self.about_me = about_me
     self.color = color
@@ -100,10 +106,10 @@ class SerververseRecord:
       guild_id2: int,
       channel_id2: int,
     ):
-    self.guild_id1 = guild_id1
-    self.channel_id1 = channel_id1
-    self.guild_id2 = guild_id2
-    self.channel_id2 = channel_id2
+    self.guild_id1 = int(guild_id1)
+    self.channel_id1 = int(channel_id1)
+    self.guild_id2 = int(guild_id2)
+    self.channel_id2 = int(channel_id2)
 
 class ServerSettingsRecord:
   def __init__(self,

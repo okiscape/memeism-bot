@@ -50,19 +50,19 @@ class Reminder(cog.Cog):
 		remind: str = cog.Param(description="О чём напомнить"),
 		time: str = cog.Param(
 			description="Через сколько напомнить (в личные сообщения)",
-			autocomplete=cog.shortcuts.generate_autocomplete_choices(REMINDER_CHOICES),
+			autocomplete=cog.sh.generate_autocomplete_choices(REMINDER_CHOICES),
 		),
 	):
 		await inter.response.defer(ephemeral=True)
 		sec = REMINDER_SECONDS.get(time)
 		if sec is None:
 			await inter.edit_original_response(
-				await cog.shortcuts.tbc(inter, "Неизвестный интервал времени.")
+				await cog.sh.tbc(inter, "Неизвестный интервал времени.")
 			)
 			return
 
 		await inter.edit_original_response(
-			await cog.shortcuts.tbc(
+			await cog.sh.tbc(
 				inter,
 				f"Установила напоминание: `{remind}` {self.bot.custom_emojis.icon_alarm}\n"
 				f"Напомню через {time} вам в личные сообщения",
@@ -80,7 +80,7 @@ class Reminder(cog.Cog):
 
 		await asyncio.sleep(sec)
 
-		title = self.bot.custom_emojis.icon_alarm + await cog.shortcuts.tbc(inter, " | Напоминаю!")
+		title = self.bot.custom_emojis.icon_alarm + await cog.sh.tbc(inter, " | Напоминаю!")
 		embed = cog.Embed(title=title, description=remind, color=0xFFFF80)
 		try:
 			await inter.author.send(inter.author.mention, embed=embed)

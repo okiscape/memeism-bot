@@ -5,7 +5,7 @@ from utils.types import Filter
 
 
 def _author_hook_name(member: cog.Member | cog.User) -> str:
-  return str(member.name or member.global_name or member.display_name)
+  return str( member.display_name or member.global_name or member.name )
 
 
 class Serververse(cog.Cog):
@@ -31,7 +31,7 @@ class Serververse(cog.Cog):
       try:
         hook = await dest.create_webhook(
           name=hook_name,
-          avatar=author.avatar,
+          avatar=author.display_avatar,
           reason="ServerVerce",
         )
       except Exception:
@@ -106,14 +106,15 @@ class Serververse(cog.Cog):
       await inter.edit_original_response("Неверный ID сервера.")
       return
 
+    is_present = [guild for guild in self.bot.guilds if guild.id == apposite_id]
+    if not is_present:
+      return await inter.edit_original_response("Бота нету на этом сервере!")
+
     row = await self.bot.database.readSerververse(apposite_id)
+    
     if row:
       record = row[0]
-      if int(record.guild_id1) == apposite_id:
-        # await self.bot.database.sql_execute(
-        #   "UPDATE serververse SET guild_id2 = ?, channel2 = ? WHERE guild_id1 = ?",
-        #   (inter.guild.id, inter.channel.id, apposite_id),
-        # )
+      if record.guild_id1 == apposite_id:
         await self.bot.database.db.update(
           table="serververse",
           filters=[
@@ -129,16 +130,16 @@ class Serververse(cog.Cog):
             Filter(column="guild_id2", value=apposite_id)
           ],
           guild_id1=inter.guild.id,
-          channel1=inter.channel.id
+          channel_id1=inter.channel.id
         )
       await inter.edit_original_response("Связь установлена!")
       return
 
     await self.bot.database.createSerververse(
       guild_id1=inter.guild.id,
-      channel1=inter.channel.id,
+      channel_id1=inter.channel.id,
       guild_id2=apposite_id,
-      channel2=0
+      channel_id2=0
     )
     await inter.edit_original_response(
       "Первый сервер установлен!\nИспользуйте эту команду на втором сервере, и укажите ID этого сервера - тогда каналы будут связаны."

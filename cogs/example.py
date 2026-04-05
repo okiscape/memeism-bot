@@ -1,7 +1,7 @@
 import cog
 
 class ExampleCog(cog.Cog):
-	def __init__(self, bot: cog.Mitsuki):
+	def __init__(self, bot: cog.MemeismBot):
 		self.bot = bot
 
 	@cog.slash_command(name="example_command")

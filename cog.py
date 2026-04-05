@@ -77,7 +77,8 @@ event = disnake_cog.listener
 listener = disnake_cog.listener
 
 from utils import (config,
-				   shortcuts)
+				   shortcuts as sh, 
+					 emojis)
 
 from utils.bot_class import MemeismBot
 

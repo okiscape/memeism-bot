@@ -41,13 +41,10 @@ class AuditLog(cog.Cog):
 		await inter.edit_original_response(embed=embed)
 
 	async def _log_channel_id(self, guild_id: int) -> int | None:
-		row = await self.bot.database.sql_fetchone(
-			"SELECT log_channel FROM server_settings WHERE guild_id = ?",
-			(guild_id,),
-		)
-		if not row or row[0] in (None, 0):
+		settings = await self.bot.database.readServerSettings(guild_id)
+		if not settings:
 			return None
-		return int(row[0])
+		return settings[0].log_channel
 
 	async def _send_log(self, guild_id: int, embed: cog.Embed) -> None:
 		ch_id = await self._log_channel_id(guild_id)
@@ -73,8 +70,8 @@ class AuditLog(cog.Cog):
 
 		embed = cog.Embed(color=0x2F3136, timestamp=datetime.datetime.now())
 		embed.description = (
-			f"> До:\n```{await cog.shortcuts.rmark(before.content)}```\n\n"
-			f"> После:\n```{await cog.shortcuts.rmark(after.content)}```\n\n"
+			f"> До:\n```{await cog.sh.rmark(before.content)}```\n\n"
+			f"> После:\n```{await cog.sh.rmark(after.content)}```\n\n"
 			f"> Автор:\n{before.author.mention} ({before.author.id})\n"
 			f"[перейти к сообщению]({after.jump_url})"
 		)

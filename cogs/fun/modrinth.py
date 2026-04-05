@@ -10,7 +10,7 @@ class Modrinth(cog.Cog):
 	@cog.slash_command(name='modrinth', description=cog.Localised(string="Information about the Mod/Shader/Resource Pack/User on the \"Modbrinth\" platform", key="modrinth_desc"))
 	async def project(self, inter: cog.ApplicationCommandInteraction,
 					  data_type: str = cog.Param(description='Укажи тип информации которую будем искать',
-												 autocomplete=cog.shortcuts.generate_pick(
+												 autocomplete=cog.sh.generate_pick(
 						["Пакет ресурсов / Ресурс пак", "Шейдер", "Мод / Дата-пак(Пакет данных) / Плагин", "Пользователь", 'Сборка / Модпак']
 												 )),
 					  query: str = cog.Param(description='Запрос')):

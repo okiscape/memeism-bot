@@ -2,12 +2,16 @@ import os
 
 import aiosqlite
 from utils.bot_logging import Logging
-from utils.types import Filter, FiltersGroup, Join, AsyncLRUTTLCache, MembershipRecord, ServerSettingsRecord, SerververseRecord, SocialRatingRecord
+from utils.types import (
+  Filter, FiltersGroup, Join, AsyncLRUTTLCache, 
+  ServerSettingsRecord, SerververseRecord, 
+  SocialRatingRecord, UserProfileRecord, 
+  UserSettingsRecord)
 
 logging = Logging()
 
 db_schema = {
-  "user_setting": {
+  "user_settings": {
       "user_id": "INTEGER PRIMARY KEY",
       "timezone": "TEXT",
       "osu_username": "TEXT"
@@ -90,7 +94,7 @@ class BasicDBManager:
                   fetchall)
 
   async def create(self, table: str, **data: dict):
-      self.logging.log("db internal", f"Start create for {table}", 
+      logging.log("db internal", f"Start create for {table}", 
           ", ".join([f"{k}: {v}" for k,v in data.items()]),
           type="pos")
 
@@ -175,7 +179,7 @@ VALUES
 
               # join group's clauses with operator and wrap in parentheses
               if group_clauses:
-                  where_clauses.append('(' + f' {filter_item.operator} '.join(group_clauses) + ')')
+                  where_clauses.append(f' {filter_item.operator} '.join(group_clauses))
               continue
 
           # Single Filter
@@ -460,11 +464,12 @@ class Caches:
             "ttl": 150
         }
     }
-    self.serverSettings = AsyncLRUTTLCache(self.cacheSettings["long"])
-    self.serververse = AsyncLRUTTLCache(self.cacheSettings["long"])
-    self.socialRating = AsyncLRUTTLCache(self.cacheSettings["short"])
-    self.membership = AsyncLRUTTLCache(self.cacheSettings["mid"])
-    self.userSetting = AsyncLRUTTLCache(self.cacheSettings["mid"])
+    self.serverSettings = AsyncLRUTTLCache(**self.cacheSettings["long"])
+    self.serververse = AsyncLRUTTLCache(**self.cacheSettings["long"])
+    self.socialRating = AsyncLRUTTLCache(**self.cacheSettings["short"])
+    self.membership = AsyncLRUTTLCache(**self.cacheSettings["mid"])
+    self.userSetting = AsyncLRUTTLCache(**self.cacheSettings["mid"])
+    self.userProfiles = AsyncLRUTTLCache(**self.cacheSettings["mid"])
 
 class DatabaseManager:
   def __init__(self, db_path: str):
@@ -477,6 +482,12 @@ class DatabaseManager:
     parent = os.path.dirname(os.path.abspath(self.db_path))
     if parent:
       os.makedirs(parent, exist_ok=True)
+
+  async def _clearCache(self):
+    for attr_name in dir(self.caches):
+      if attr_name.startswith('_cache') and attr_name.endswith('Store'):
+        cache_store: AsyncLRUTTLCache = getattr(self, attr_name)
+        await cache_store.clear()
 
   async def init_schema(self) -> None:
     await self.db.connect()
@@ -506,18 +517,17 @@ class DatabaseManager:
     return None
 
   
-  async def readMembership(self, 
+  async def readUserSettings(self,
       user_id: int = None,
       limit: int = 10, 
       offset: int = 0,
       orderBy: str = None,
       orderDir: str = "DESC",
-      cacheOverwrite: bool = False) -> list[SocialRatingRecord]:
-    
+      cacheOverwrite: bool = False) -> list[UserSettingsRecord]:
     _cachekey = f"{user_id};{limit};{offset};{orderBy};{orderDir}"
     if not cacheOverwrite:
       cached = await self._getCached(
-        store=self.caches.socialRating,
+        store=self.caches.userSetting,
         key=_cachekey
       )
       if cached:
@@ -527,53 +537,165 @@ class DatabaseManager:
        filters.append(Filter("user_id", user_id))
 
     fetch = (await self.db.read(
-      table="membership",
+      table="user_settings",
       columns=[
         "user_id",
-        "about_me",
-        "color",
-        "custom_image",
-        "is_active"
+        "timezone",
+        "osu_username"
       ],
       filters=filters
     )).fetchall
     
-    to_return: list[SocialRatingRecord] = []
+    to_return: list[UserSettingsRecord] = []
 
     for row in fetch:
        to_return.append(
-          MembershipRecord(
-             # TODO
+          UserSettingsRecord(
+             user_id=row[0],
+             timezone=row[1],
+             osu_username=row[2]
           )
        )
     
-    await self.caches.socialRating.set(
+    await self.caches.userSetting.set(
       _cachekey,
       to_return
     )
 
     return to_return
 
-  # todo: readServerSettings
+  async def createUserSettings(self, 
+      user_id: int,
+      timezone: str = None,
+      osu_username: str = None  
+    ):
+    await self.db.create(
+      table="user_settings",
+      user_id=user_id,
+      timezone=timezone,
+      osu_username=osu_username
+    )
+  
+  async def updateUserSettings(self, 
+      user_id: int,
+      timezone: str = '',
+      osu_username: str = ''  
+    ):
+    updates = {}
+    if timezone != "": updates["timezone"] = timezone
+    if osu_username != '': updates["osu_username"] = osu_username
+
+    await self.db.update(
+      table="user_settings",
+      filters=[
+         Filter("user_id", user_id)
+      ],
+      **updates
+    )
+    
+
+  async def readUserProfiles(self, 
+      user_id: int = None,
+      limit: int = 10, 
+      offset: int = 0,
+      orderBy: str = None,
+      orderDir: str = "DESC",
+      cacheOverwrite: bool = False) -> list[UserProfileRecord]:
+    
+    _cachekey = f"{user_id};{limit};{offset};{orderBy};{orderDir}"
+    if not cacheOverwrite:
+      cached = await self._getCached(
+        store=self.caches.userProfiles,
+        key=_cachekey
+      )
+      if cached:
+        return cached
+    filters = []
+    if user_id:
+       filters.append(Filter("user_id", user_id))
+
+    fetch = (await self.db.read(
+      table="user_profiles",
+      columns=[
+        "user_id",
+        "about_me",
+        "color",
+        "custom_image"
+      ],
+      filters=filters
+    )).fetchall
+    
+    to_return: list[UserProfileRecord] = []
+
+    for row in fetch:
+       to_return.append(
+          UserProfileRecord(
+             user_id=row[0],
+             about_me=row[1],
+             color=row[2],
+             custom_image=row[3]
+          )
+       )
+    
+    await self.caches.userProfiles.set(
+      _cachekey,
+      to_return
+    )
+
+    return to_return
+
+  async def createUserProfile(self, 
+      user_id: int,
+      about_me: str = None,
+      color: str = None,
+      custom_image: str = None
+    ):
+    await self.db.create(
+      table="user_profiles",
+
+      user_id=user_id,
+      about_me=about_me,
+      color=color,
+      custom_image=custom_image
+    )
+  
+  async def updateUserProfile(self, 
+      user_id: int,
+      about_me: str = "no_change",
+      color: str = "no_change",
+      custom_image: str = "no_change"
+    ):
+    updates = {}
+    if about_me != "no_change": updates["about_me"] = about_me
+    if color != 'no_change': updates["color"] = color
+    if custom_image != "no_change": updates["custom_image"] = custom_image
+    
+    await self.db.update(
+      table="user_profiles",
+      filters=[
+         Filter("user_id", user_id)
+      ],
+      **updates
+    )
 
 
   async def createSerververse(self, 
       guild_id1: int,
-      channel1: int,
+      channel_id1: int,
       guild_id2: int,
-      channel2: int,):
+      channel_id2: int,):
     await self.db.create(
       table="serververse",
 
       guild_id1=guild_id1,
       guild_id2=guild_id2,
-      channel1=channel1,
-      channel2=channel2,
+      channel_id1=channel_id1,
+      channel_id2=channel_id2,
     )
 
   async def readSerververse(self, 
       guild_id: int, 
-      channel_id: int,
+      channel_id: int = None,
       limit: int = 10, 
       offset: int = 0,
       orderBy: str = None,
@@ -589,24 +711,29 @@ class DatabaseManager:
       if cached:
         return cached
 
+    filters = [
+      FiltersGroup("OR", [
+        Filter("guild_id1", guild_id),
+        Filter("guild_id2", guild_id)
+      ])
+    ]
+    if channel_id:
+      filters.append(
+        FiltersGroup("OR", [
+          Filter("channel_id1", channel_id),
+          Filter("channel_id2", channel_id)
+        ])
+      )
+
     fetch = (await self.db.read(
-      table="server_settings",
+      table="serververse",
       columns=[
         "guild_id1",
         "channel_id1",
         "guild_id2",
         "channel_id2"
       ],
-      filters=[
-        FiltersGroup("OR", [
-          Filter("guild_id1", guild_id),
-          Filter("guild_id2", guild_id)
-        ]), 
-        FiltersGroup("OR", [
-          Filter("channel_id1", channel_id),
-          Filter("channel_id2", channel_id)
-        ])
-      ]
+      filters=filters
     )).fetchall
     
     to_return: list[ServerSettingsRecord] = []
@@ -621,7 +748,7 @@ class DatabaseManager:
           )
        )
     
-    await self.caches.serverSettings.set(
+    await self.caches.serververse.set(
       _cachekey,
       to_return
     )
@@ -710,6 +837,8 @@ class DatabaseManager:
 
     return to_return
 
+  async def createServerSettings()
+     
 
   async def updateSocialRating(self, user_id: int, to_rating: int):
     await self.db.update(
