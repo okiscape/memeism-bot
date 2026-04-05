@@ -755,6 +755,12 @@ class DatabaseManager:
 
     return to_return
 
+  async def deleteSerververse():
+    ...
+    #todo  
+
+  # функции обновления серверверса быть не должно, он обновляется вручную прямо из кода через db.update
+
 
   async def readServerSettings(self, guild_id: int, 
       limit: int = 10, 
@@ -837,8 +843,16 @@ class DatabaseManager:
 
     return to_return
 
-  async def createServerSettings()
-     
+  async def createServerSettings():
+    ...
+    # todo
+  async def updateServerSettings():
+    ...
+    # todo
+  async def deleteServerSettings():
+    ...
+    # todo
+  
 
   async def updateSocialRating(self, user_id: int, to_rating: int):
     await self.db.update(
@@ -900,3 +914,7 @@ class DatabaseManager:
     )
 
     return to_return
+  
+  async def deleteSocialRating():
+    ...
+    # todo
