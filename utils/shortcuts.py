@@ -1,122 +1,115 @@
 import datetime
-from utils import config, emojis
-import inspect
-import googletrans, disnake
+from typing import Any
 
-def now_datetime(): return datetime.datetime.now(config.local_tz)
-def datetime_from_timestamp(timestamp: int): return datetime.datetime.fromtimestamp(timestamp, config.local_tz)
+import disnake
+
+from utils import config, emojis
+
+
+def now_datetime():
+    return datetime.datetime.now(config.local_tz)
+
+
+def datetime_from_timestamp(timestamp: int):
+    return datetime.datetime.fromtimestamp(timestamp, config.local_tz)
+
 
 def rmark(text: str) -> str:
-  return disnake.utils.escape_markdown(text or "")
+    return disnake.utils.escape_markdown(text or "")
+
+
+def replace_placeholders(text: str, placeholders: dict[str, Any]) -> str:
+    for key, value in placeholders.items():
+        text = text.replace(key, str(value))
+    return text
+
+
+def build_spotify_placeholders(activity: disnake.Spotify) -> dict[str, str]:
+    return {
+        "{spotify.title}": activity.title,
+        "{spotify.artist}": activity.artist,
+        "{spotify.album}": activity.album,
+        "{spotify.track_url}": activity.track_url,
+        "{spotify.album_cover_url}": activity.album_cover_url,
+        "{spotify.duration}": str(activity.duration),
+        "{spotify.start}": str(activity.start),
+        "{spotify.end}": str(activity.end),
+    }
 
 
 class MessageDeleteView(disnake.ui.View):
-  """Как в Mitsuki: только эмодзи, без проверки автора."""
+    def __init__(self) -> None:
+        super().__init__(timeout=None)
 
-  def __init__(self) -> None:
-    super().__init__(timeout=None)
-
-  @disnake.ui.button(emoji=emojis.icon_remove, style=disnake.ButtonStyle.secondary, row=0)
-  async def remove_button(
-    self,
-    _: disnake.ui.Button,
-    inter: disnake.MessageInteraction,
-  ) -> None:
-    await inter.message.delete()
+    @disnake.ui.button(
+        emoji=emojis.icon_remove, style=disnake.ButtonStyle.secondary, row=0
+    )
+    async def remove_button(
+        self,
+        _: disnake.ui.Button,
+        inter: disnake.MessageInteraction,
+    ) -> None:
+        await inter.message.delete()
 
 
 def generate_autocomplete_choices(choices: list[str]):
-  async def returned(inter, string: str) -> list[str]:
-    string = string.lower()
-    return [lang for lang in choices if string in lang.lower()]
+    async def returned(inter, string: str) -> list[str]:
+        string = string.lower()
+        return [lang for lang in choices if string in lang.lower()]
 
-  return returned
+    return returned
 
 
 async def get_time_in_timezone(offset: int):
-  """Получить время в указанном UTC offset"""
-  utc_now = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=offset)
-  return utc_now
+    utc_now = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
+        hours=offset
+    )
+    return utc_now
+
 
 def generate_pick(choices: list[str]):
-  """Как в Mitsuki — alias для autocomplete."""
-  return generate_autocomplete_choices(choices)
+    return generate_autocomplete_choices(choices)
+
 
 class Translation:
-  def __init__(self, i18n: disnake.LocalizationProtocol):
-    self.i18n = i18n
+    def __init__(self, i18n: disnake.LocalizationProtocol):
+        self.i18n = i18n
 
-  def translate(self, inter: disnake.ApplicationCommandInteraction, key: str, **kwargs):
-    text = self.i18n.get(key)
-    if text:
-      text = text.get(inter.locale.value)
-    
-    if text is None:
-      return key
-    
-    return text.format(**kwargs) if kwargs else text
+    def parsePlaceholders(
+        self,
+        inter: disnake.ApplicationCommandInteraction | disnake.ModalInteraction,
+        localed: str,
+        target: disnake.User | disnake.Member | None = None,
+    ) -> str:
+        placeholders = {
+            "requester.display_name": inter.author.display_name,
+            "requester.mention": inter.author.mention,
+            "requester.global_name": inter.author.global_name,
+            "requester.id": inter.author.id,
+        }
+        if target:
+            placeholders.update(
+                {
+                    "target.display_name": target.display_name,
+                    "target.mention": target.mention,
+                    "target.global_name": target.global_name,
+                    "target.id": target.id,
+                }
+            )
+        return replace_placeholders(localed, placeholders)
 
-  
-  # inter.guild_locale.value
+    def translate(
+        self,
+        inter: disnake.ApplicationCommandInteraction | disnake.ModalInteraction,
+        key: str,
+        **kwargs,
+    ) -> str:
+        text = self.i18n.get(key)
+        after = ""
+        if text:
+            after = text.get(inter.locale.value)
 
-  
-  # return text
-  
-  # """tbc - translate-by-client
-  
-  # Перевод строки на язык клиента дискорда или сервера по коду языка.
-  
-  # Типы:
-  #   "user": перевод строки по клиента автора
-  #   "guild": перевод строки по языку сервера из базы"""
-  
-  # if do_not_translate is None:
-  #   if translate_type == "user":
-  #     try:
-  #       translated = await googletrans.Translator().translate(text, _locale_dest(inter))
-  #       return translated.text
-  #     except:
-  #       try:
-  #         translated = await googletrans.Translator().translate(text, 'en')
-  #         return translated.text
-  #       except:
-  #         return text
-        
-  #   elif translate_type == "guild":
-  #     cur = await get_cursor()
-  #     cur.execute(f"SELECT * FROM `server_settings` WHERE `guild_id` = {inter.guild_id}")
-  #     server_language = cur.fetchone()
-  #     try:
-  #       translated = googletrans.Translator().translate(text, server_language)
-  #       return translated.text
-  #     except:
-  #       translated = googletrans.Translator().translate(text, 'en')
-  #       return translated.text
-    
-  # else:
-  #   try:
-  #     if translate_type == "user":
-  #       try:
-  #         translated = googletrans.Translator().translate(text, dest=_locale_dest(inter))
-  #         return translated.text
-  #       except:
-  #         try:
-  #           translated = googletrans.Translator().translate(text, dest="en")
-  #           return translated.text
-  #         except:
-  #           return text
-          
-  #     elif translate_type == "guild":
-  #       cur = await get_cursor()
-  #       cur.execute(f"SELECT * FROM `server_settings` WHERE `guild_id` = {inter.guild_id}")
-  #       server_language = cur.fetchone()
-  #       try:
-  #         translated = googletrans.Translator().translate(text, server_language)
-  #         return translated.text
-  #       except:
-  #         translated = googletrans.Translator().translate(text, "en")
-  #         return translated.text
-        
-  #   except:
-  #     translated = googletrans.Translator().translate(text, 'en')
-  #     return translated.text
+        if after is None:
+            return f"{{{key}}}"
+
+        return str(after.format(**kwargs) if kwargs else after)

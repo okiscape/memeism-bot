@@ -1,0 +1,82 @@
+{
+    "info": {
+        "avatar": {
+            "title": "Avatar link",
+            "usercommand.name": "Get avatar",
+            "footer": "Requested by {requester.display_name}"
+        },
+        "banner": {
+            "usercommand.name": "Get banner",
+            "title": "Banner of {name}",
+            "error": {
+                "no_banner": "{target.mention} doesn't have a banner",
+                "fetch_failed": "Error! {user_mention} probably doesn't have a banner!"
+            }
+        },
+        "channel": {
+            "title": "Information about channel #{channel_name}",
+            "description": "Channel ID: `{channel_id}`\nMention: {channel_mention}\n\nNSFW: {nsfw}\n\nNews: {news}\n\nCreated: <t:{ts}:R> / at <t:{ts}:F>"
+        },
+        "server": {
+            "title": "About {server_name}",
+            "field": {
+                "owner": "{emoji} Owner",
+                "created": "{emoji} Created",
+                "id": "{emoji} Server ID",
+                "channels": "{emoji} Channels",
+                "channels_value": "Text: *{text}*\nVoice: *{voice}*\nForums: *{forum}*\nCategories: *{categories}*",
+                "emojis": "{emoji} Emojis: {count}",
+                "roles": "{emoji} Roles: {count}",
+                "roles_value": "Click the button below to see all role mentions",
+                "members": "{emoji} Members",
+                "members_value": "*{count} members*\n*{boosts} boosts*",
+                "verification": "{emoji} Verification level"
+            },
+            "button": {
+                "roles": "View server roles",
+                "categories": "View server categories"
+            },
+            "roles": {
+                "title": "Roles of {server_name}"
+            },
+            "categories": {
+                "title": "Channels of {server_name}",
+                "field": "ID: {id}\nChannels: {count}\nNSFW: {nsfw}"
+            }
+        },
+        "ping": {
+            "response": ":ping_pong: Pong!\nLatency {ping}ms!"
+        },
+        "invite": {
+            "add_label": "Add {bot_name}",
+            "title": "Hi {user_name}!",
+            "description": "Click the buttons below to invite the bot to your servers,\nor join our development server!",
+            "button": {
+                "dev_server": "Development server"
+            }
+        },
+        "main": {
+            "title": "About kisa",
+            "summary": "**kisa** - a multifunctional bot for Discord servers\n\n> Moderation, logging, ratings, custom greetings, profiles, timestamps, reminders and more!",
+            "footer": "Requested by {user_display_name}",
+            "field": {
+                "developer_server": {
+                    "title": "\ud83d\udc68\u200d\ud83d\udcbb Developer server",
+                    "value": "[Click here to join]({invite_url})"
+                },
+                "created_at": {
+                    "title": "\ud83d\udcc5 Created",
+                    "value": "<t:{timestamp}:f> (<t:{timestamp}:R>)"
+                },
+                "version": {
+                    "title": "\ud83c\udff7\ufe0f Version",
+                    "value": "`v{number}` \u2014 *{name}*"
+                },
+                "commands": {
+                    "title": "\ud83d\udccb Commands",
+                    "value": "**Total: {cmd_sum}**\nSlash: {slash_count}\nMessage: {message_count}\nUser: {user_count}"
+                }
+            }
+        }
+    }
+}

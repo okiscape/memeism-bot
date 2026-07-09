@@ -1,0 +1,38 @@
+{
+    "serververse": {
+        "link": {
+            "description": "Link this channel with a channel on another server",
+            "option": {
+                "target": "ID of the target server"
+            },
+            "error": {
+                "invalid_id": "Invalid server ID. Must be a numeric ID.",
+                "not_on_server": "I'm not on that server.",
+                "already_linked": "A link between these servers already exists.",
+                "already_invited": "You already sent an invitation to that server. Ask them to run `/serververse link` with this server's ID."
+            },
+            "invitation_sent": "Invitation sent! On the target server, run `/serververse link` with this server's ID to complete the link.",
+            "completed": "Channels are now linked! Messages will be relayed between them."
+        },
+        "channel": {
+            "description": "Add another channel to an existing link",
+            "not_found": "No link found for this server.",
+            "changed": "This channel has been added to the link!",
+            "error": "Could not determine which side of the link to update."
+        },
+        "unlink": {
+            "description": "Remove all links for this server",
+            "not_found": "No links found for this server.",
+            "completed": "Removed:\n{details}"
+        },
+        "info": {
+            "description": "Show information about the linked server and channel",
+            "not_found": "No link found for this channel.",
+            "not_accessible": "The linked server is no longer accessible.",
+            "title": "Linked to **{server_name}**",
+            "channel": "#{channel_name}",
+            "category": "Category: {category_name}",
+            "no_category": "No category"
+        }
+    }
+}

@@ -1,5 +1,5 @@
-# memeism bot
-> ultimate bot with unlimited integrations for communications
+# kisa bot
+> ultimate discord bot with unlimited integrations for communications
 
 **.env scheme**
 ```env

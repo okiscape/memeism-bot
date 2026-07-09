@@ -1,4 +1,4 @@
 disnake
 dotenv
-aiosqlite
-googletrans
+asyncpg
+langcodes

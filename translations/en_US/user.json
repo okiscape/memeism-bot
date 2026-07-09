@@ -1,73 +1,55 @@
 {
-  "user_desc": "Show user information",
-  "user_profile_timezone": "Set timezone for your public profile",
+    "user": {
+        "usercommand.name": "Show user information",
+        "slash.description": "Show user information",
+        "slash.option.member.description": "Target member",
+        "response": {
+            "title": "Information about {name}",
 
-  "user.main.title": "Information about {name}",
-  "user.main.description.id": "**User ID:** `{id}`",
-  "user.main.description.names": "**User name:** {global_name} ({username})",
-  
-  "user.main.description.status":"**Status:** {emoji} {value}",
-  "user.main.description.status_from":"**Online from:** {platforms}",
+            "id": "**User ID:** `{id}`",
+            "names": "**User name:** {global_name} ({username})",
 
-  "user.main.description.joined_at": "**Joined the **server: <t:{timestamp}:f> (<t:{timestamp}:R>)",
-  "user.main.description.created_at": "**Account created:** <t:{timestamp}:f> (<t:{timestamp}:R>)",
-  "user.main.description.timezone": "**Current time:** {time} ({tz})",
+            "status": "**Status:** {emoji} {value}",
 
-  "user.main.description.global_banner": "[Global banner]({banner})",
-  "user.main.description.guild_banner": "[Guild banner]({banner})",
-  "user.main.description.global_avatar": "[Global avatar]({avatar})",
-  "user.main.description.guild_avatar": "[Guild avatar]({avatar})",
-  "user.main.description.media_files": "**Profile files:** {links}",
+            "joined_at": "**Joined the **server: <t:{timestamp}:f> (<t:{timestamp}:R>)",
+            "created_at": "**Account created:** <t:{timestamp}:f> (<t:{timestamp}:R>)",
+            "timezone": "**Current time:** {time} ({tz})",
 
-  "mention_field": "📍 | Mention",
+            "global_banner": "[Global banner]({banner})",
+            "guild_banner": "[Guild banner]({banner})",
+            "global_avatar": "[Global avatar]({avatar})",
+            "guild_avatar": "[Guild avatar]({avatar})",
+            "media_files": "**Profile files:** {links}",
 
-  "offline": "Offline",
-  "idle": "Idle",
-  "dnd": "Do Not Disturb",
-  "online": "Online",
+            "spotify": {
+                "author": "{name} is currently listening to...",
+                "artist": "**Artist**: {spotify.artist}",
+                "album": "**Album**: {spotify.album}"
+            },
+            "social_rating": "**{rating}**"
+        }
+    },
 
-  "media_links_title": "Profile media files",
+    "about_me": "About me",
 
+    "active_developer": "Active Developer",
+    "hypesquad_balance": "HypeSquad: Balance",
+    "hypesquad_bravery": "HypeSquad: Bravery",
+    "hypesquad_brilliance": "HypeSquad: Brilliance",
+    "hypesquad_events": "HypeSquad Events",
+    "bug_hunter": "Bug Hunter",
+    "early_moderator": "Early Verified Moderator",
+    "certified_moderator": "Discord Certified Moderator",
+    "early_supporter": "Early Supporter",
+    "verified_bot": "Bot (verified)",
+    "bot": "Bot",
+    "verified_bot_developer": "Verified Bot Developer",
 
-  "avatars_field_title": "Banners",
-  "media_display_avatar_link": "Link to guild avatar",
-  "media_avatar_link": "Link to global avatar",
+    "error_occurred": "An error occurred while fetching information",
+    "user_not_found": "User not found",
 
-  "banners_field_title": "Link to banner",
-  "media_display_banner_link": "Link to guild banner",
-  "media_banner_link": "Link to global banner",
+    "timezone_set": "Timezone set to {zone}\nTime: `{time}`",
 
-  "spotify_listening": "{name} is currently listening to...",
-  "spotify_artist": "Artist: ",
-  "spotify_album": "Album: ",
-  "spotify_more_info": "||> You can learn more about the track via the \"What is playing...\" command||",
-
-  "about_me": "About me",
-
-  "active_developer": "Active Developer",
-  "hypesquad_balance": "HypeSquad: Balance",
-  "hypesquad_bravery": "HypeSquad: Bravery",
-  "hypesquad_brilliance": "HypeSquad: Brilliance",
-  "hypesquad_events": "HypeSquad Events",
-  "bug_hunter": "Bug Hunter",
-  "early_moderator": "Early Verified Moderator",
-  "certified_moderator": "Discord Certified Moderator",
-  "early_supporter": "Early Supporter",
-  "verified_bot": "Bot (verified)",
-  "bot": "Bot",
-  "verified_bot_developer": "Verified Bot Developer",
-
-  "social_rating": "Social rating: **{rating}**",
-
-  "status_desktop": "Desktop",
-  "status_web": "Web",
-  "status_mobile": "Mobile",
-
-  "error_occurred": "An error occurred while fetching information",
-  "user_not_found": "User not found",
-
-  "timezone_set": "Timezone set to {zone}\nTime: `{time}`",
-
-  "self_delete_button": "Delete message",
-  "test_locales": "en_US locale"
+    "self_delete_button": "Delete message",
+    "test_locales": "en_US locale"
 }

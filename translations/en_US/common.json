@@ -1,0 +1,17 @@
+{
+    "common": {
+        "yes": "Yes",
+        "no": "No",
+        "device": {
+            "web": "Web",
+            "desktop": "Desktop",
+            "mobile": "Mobile"
+        },
+        "status": {
+            "dnd": "Do Not Disturb",
+            "online": "Online",
+            "idle": "Idle",
+            "offline": "Offline"
+        }
+    }
+}
