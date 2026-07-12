@@ -2,10 +2,9 @@ import asyncio
 import datetime
 import re
 
+import cog
 import disnake
 import langcodes
-
-import cog
 
 
 def _parse_color(val, default: int) -> int:
@@ -176,13 +175,13 @@ class Settings(cog.Cog):
             await self.bot.database.createServerSettings(guild_id=guild_id)
 
     async def parse_time(self, input_time: str) -> int:
-        matches = re.findall(r"[чм]|[hm]", input_time)
+        matches = re.findall(r"[hm]", input_time)
         time_dict = {m: input_time.count(m) for m in matches}
         seconds = 0
         for key, value in time_dict.items():
-            if key in ["ч", "h"]:
+            if key in ["h"]:
                 seconds += value * 3600
-            if key in ["м", "m"]:
+            if key in ["m"]:
                 seconds += value * 60
         return seconds
 

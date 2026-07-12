@@ -1,5 +1,4 @@
 import asyncpg
-
 from utils.bot_logging import Logging
 from utils.types import (
     AsyncLRUTTLCache,
@@ -26,7 +25,6 @@ db_schema = {
         "about_me": "TEXT",
         "color": "TEXT",
         "custom_image": "TEXT",
-        "is_active": "INTEGER NOT NULL DEFAULT 1",
     },
     "server_settings": {
         "guild_id": "BIGINT PRIMARY KEY",

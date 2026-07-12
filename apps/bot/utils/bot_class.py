@@ -1,15 +1,12 @@
 import json
 from pathlib import Path
-from pprint import pprint
-from typing import Dict
 
 import disnake
-from disnake.ext.commands import Cog, InteractionBot
-
+from disnake.ext.commands import AutoShardedInteractionBot, Cog
 from utils import bot_logging, config, database, emojis, shortcuts
 
 
-class KisaBot(InteractionBot):
+class KisaBot(AutoShardedInteractionBot):
     """Custom Bot Class"""
 
     def __init__(self, cogs: list[str] = []) -> None:

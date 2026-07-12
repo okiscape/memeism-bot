@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserSettings {
+  userId      BigInt  @id @map("user_id")
+  timezone    String? @db.Text
+  osuUsername  String? @map("osu_username") @db.Text
+
+  profile      UserProfile?  @relation("UserSettingsProfile")
+  socialRating SocialRating? @relation("UserSettingsRating")
+
+  @@map("user_settings")
+}
+
+model UserProfile {
+  userId       BigInt   @id @map("user_id")
+  aboutMe      String?  @map("about_me") @db.Text
+  color        String?  @db.Text
+  customImage  String?  @map("custom_image") @db.Text
+
+  userSettings UserSettings @relation("UserSettingsProfile", fields: [userId], references: [userId])
+
+  @@map("user_profiles")
+}
+
+model ServerSettings {
+  guildId             BigInt   @id @map("guild_id")
+  averageLanguage     String?  @map("average_language") @db.Text
+  badWords            String?  @map("bad_words") @db.Text
+  notifiedModerators  String?  @map("notified_moderators") @db.Text
+  notifyChannel       BigInt?  @map("notify_channel")
+  badWordsAction      String?  @map("bad_words_action") @db.Text
+  joinChannel         BigInt?  @map("join_channel")
+  leaveChannel        BigInt?  @map("leave_channel")
+  postChannel         BigInt?  @map("post_channel")
+  muteRole            BigInt?  @map("mute_role")
+  autoRole            BigInt?  @map("auto_role")
+  logChannel          BigInt?  @map("log_channel")
+  verifiedRole        BigInt?  @map("verified_role")
+  ticketCategory      BigInt?  @map("ticket_category")
+  fareText            String?  @map("fare_text") @db.Text
+  fareColor           String?  @map("fare_color") @db.Text
+  fareImage           String?  @map("fare_image") @db.Text
+  greetText           String?  @map("greet_text") @db.Text
+  greetColor          String?  @map("greet_color") @db.Text
+  greetImage          String?  @map("greet_image") @db.Text
+  privateCrChannel    BigInt?  @map("private_cr_channel")
+  privateCategory     BigInt?  @map("private_category")
+  customGreet         String?  @map("custom_greet") @db.Text
+  customFare          String?  @map("custom_fare") @db.Text
+  notifyText          String?  @map("notify_text") @db.Text
+
+  @@map("server_settings")
+}
+
+model SocialRating {
+  userId  BigInt @id @map("user_id")
+  rating  Int    @default(0)
+
+  userSettings UserSettings @relation("UserSettingsRating", fields: [userId], references: [userId])
+
+  @@map("social_rating")
+}
+
+model Serververse {
+  id          Int    @id @default(autoincrement())
+  guildId1    BigInt @map("guild_id1")
+  channelId1  BigInt @map("channel_id1")
+  guildId2    BigInt @map("guild_id2")
+  channelId2  BigInt @map("channel_id2")
+
+  @@unique([guildId1, channelId1, guildId2, channelId2])
+  @@map("serververse")
+}

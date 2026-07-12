@@ -2,3 +2,4 @@ disnake
 dotenv
 asyncpg
 langcodes
+pytz

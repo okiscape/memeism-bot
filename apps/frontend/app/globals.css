@@ -1,0 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap");
+
+:root {
+    --color-accent1: #ff9e3d;
+    --color-accent2: #eeba93;
+    --color-accent3: #ffeada;
+    background-color: #000;
+    color: #fff;
+    font-family: "Product Sans", "Google Sans";
+}
+
+* {
+    margin: 0;
+}
+
+body {
+    width: 100%;
+    height: 98vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+a {
+    text-decoration: none;
+}
+
+::view-transition-old(root) {
+    animation: fade-out 0.3s ease forwards;
+}
+::view-transition-new(root) {
+    animation: fade-in 0.3s ease forwards;
+}

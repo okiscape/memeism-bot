@@ -1,28 +1,62 @@
 services:
-    postgres:
-        image: postgres:16-alpine
-        environment:
-            POSTGRES_DB: memeism
-            POSTGRES_USER: memeism
-            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-        volumes:
-            - pgdata:/var/lib/postgresql/data
-        restart: unless-stopped
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U memeism"]
-            interval: 5s
-            timeout: 5s
-            retries: 5
-    bot:
-        build: .
-        depends_on:
-            postgres:
-                condition: service_healthy
-        environment:
-            POSTGRES_HOST: postgres
-        volumes:
-            - ./.env:/app/.env:ro
-        restart: unless-stopped
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-kisa}
+      POSTGRES_USER: ${POSTGRES_USER:-kisa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kisapass}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kisa}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  bot:
+    build: ./apps/bot
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kisa}:${POSTGRES_PASSWORD:-kisapass}@postgres:5432/${POSTGRES_DB:-kisa}
+      BACKEND_PORT: 3001
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    depends_on:
+      - backend
+    env_file:
+      - .env
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:3001}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
 
 volumes:
-    pgdata:
+  pgdata:

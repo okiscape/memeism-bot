@@ -132,25 +132,25 @@ class ServerSettingsRecord:
     def __init__(
         self,
         guild_id: int,
-        average_language: str,
-        bad_words: str,
-        notified_moderators: str,
-        notify_channel: int,
-        bad_words_action: str,
-        join_channel: int,
-        leave_channel: int,
-        post_channel: int,
-        mute_role: int,
-        auto_role: int,
-        log_channel: int,
-        verified_role: int,
-        ticket_category: int,
-        fare_text: str,
-        fare_color: str,
-        fare_image: str,
-        greet_text: str,
-        greet_color: str,
-        greet_image: str,
+        average_language: str | None = None,
+        bad_words: str | None = None,
+        notified_moderators: str | None = None,
+        notify_channel: int | None = None,
+        bad_words_action: str | None = None,
+        join_channel: int | None = None,
+        leave_channel: int | None = None,
+        post_channel: int | None = None,
+        mute_role: int | None = None,
+        auto_role: int | None = None,
+        log_channel: int | None = None,
+        verified_role: int | None = None,
+        ticket_category: int | None = None,
+        fare_text: str | None = None,
+        fare_color: str | None = None,
+        fare_image: str | None = None,
+        greet_text: str | None = None,
+        greet_color: str | None = None,
+        greet_image: str | None = None,
         private_cr_channel: int | None = None,
         private_category: int | None = None,
         custom_greet: str | None = None,
@@ -160,7 +160,9 @@ class ServerSettingsRecord:
         self.guild_id = guild_id
         self.average_language = average_language
         self.bad_words = bad_words
-        self.notified_moderators: list[int] = notified_moderators.split(",")
+        self.notified_moderators = notified_moderators
+        if notified_moderators:
+            self.notified_moderators = notified_moderators.split(",")
         self.notify_channel = notify_channel
         self.bad_words_action = bad_words_action
         self.join_channel = join_channel
