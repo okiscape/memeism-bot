@@ -1,0 +1,61 @@
+name: Build Service
+
+on:
+    workflow_call:
+        inputs:
+            service_name:
+                required: true
+                type: string
+            filter_paths:
+                required: true
+                type: string
+            dockerfile:
+                required: true
+                type: string
+            context:
+                required: true
+                type: string
+            image_tag:
+                required: true
+                type: string
+            push:
+                required: true
+                type: boolean
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 2
+
+            - name: Check for ${{ inputs.service_name }} changes
+              id: filter
+              uses: dorny/paths-filter@v3
+              with:
+                  filters: ${{ inputs.filter_paths }}
+
+            - name: Set up Docker Buildx
+              if: steps.filter.outputs.src == 'true'
+              uses: docker/setup-buildx-action@v3
+
+            - name: Log in to GHCR
+              if: steps.filter.outputs.src == 'true' && inputs.push == true
+              uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build and (maybe) push ${{ inputs.service_name }}
+              if: steps.filter.outputs.src == 'true'
+              uses: docker/build-push-action@v5
+              with:
+                  context: ${{ inputs.context }}
+                  file: ${{ inputs.dockerfile }}
+                  push: ${{ inputs.push }}
+                  tags: ${{ inputs.image_tag }}
+                  cache-from: type=gha,scope=${{ inputs.service_name }}
+                  cache-to: type=gha,scope=${{ inputs.service_name }},mode=max

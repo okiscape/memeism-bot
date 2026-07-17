@@ -1,0 +1,76 @@
+name: CI Build Check
+
+on:
+    push:
+        branches-ignore:
+            - master
+        paths:
+            - "apps/bot/**"
+            - "apps/backend/**"
+            - "apps/frontend/**"
+            - "packages/shared/**"
+            - "turbo.json"
+            - "package.json"
+            - "pnpm-lock.yaml"
+            - ".github/workflows/ci.yml"
+            - ".github/workflows/build.service.yml"
+    pull_request:
+        paths:
+            - "apps/bot/**"
+            - "apps/backend/**"
+            - "apps/frontend/**"
+            - "packages/shared/**"
+            - "turbo.json"
+            - "package.json"
+            - "pnpm-lock.yaml"
+
+jobs:
+    build-bot:
+        uses: ./.github/workflows/build.service.yml
+        permissions:
+            contents: read
+        with:
+            service_name: bot
+            filter_paths: |
+                src:
+                    - 'apps/bot/**'
+            dockerfile: apps/bot/Dockerfile
+            context: .
+            image_tag: kisa-bot:ci
+            push: false
+
+    build-backend:
+        uses: ./.github/workflows/build.service.yml
+        permissions:
+            contents: read
+        with:
+            service_name: backend
+            filter_paths: |
+                src:
+                    - 'apps/backend/**'
+                    - 'packages/shared/**'
+                    - 'turbo.json'
+                    - 'package.json'
+                    - 'pnpm-lock.yaml'
+            dockerfile: apps/backend/Dockerfile
+            context: .
+            image_tag: kisa-backend:ci
+            push: false
+
+    build-frontend:
+        uses: ./.github/workflows/build.service.yml
+        permissions:
+            contents: read
+        with:
+            service_name: frontend
+            filter_paths: |
+                src:
+                    - 'apps/frontend/**'
+                    - 'packages/shared/**'
+                    - 'turbo.json'
+                    - 'package.json'
+                    - 'pnpm-lock.yaml'
+            dockerfile: apps/frontend/Dockerfile
+            context: .
+            image_tag: kisa-frontend:ci
+            push: false

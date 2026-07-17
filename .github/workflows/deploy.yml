@@ -1,0 +1,70 @@
+name: Production Build and Push
+
+on:
+    push:
+        branches:
+            - master
+        paths:
+            - "apps/bot/**"
+            - "apps/backend/**"
+            - "apps/frontend/**"
+            - "packages/shared/**"
+            - ".github/workflows/deploy.yml"
+            - ".github/workflows/build.service.yml"
+
+env:
+    IMAGE_BASE: ghcr.io/okiscape
+
+jobs:
+    build-bot:
+        uses: ./.github/workflows/build.service.yml
+        permissions:
+            contents: read
+            packages: write
+        with:
+            service_name: bot
+            filter_paths: |
+                src:
+                    - 'apps/bot/**'
+            dockerfile: apps/bot/Dockerfile
+            context: .
+            image_tag: ghcr.io/okiscape/kisa-bot:latest
+            push: true
+
+    build-backend:
+        uses: ./.github/workflows/build.service.yml
+        permissions:
+            contents: read
+            packages: write
+        with:
+            service_name: backend
+            filter_paths: |
+                src:
+                    - 'apps/backend/**'
+                    - 'packages/shared/**'
+                    - 'turbo.json'
+                    - 'package.json'
+                    - 'pnpm-lock.yaml'
+            dockerfile: apps/backend/Dockerfile
+            context: .
+            image_tag: ghcr.io/okiscape/kisa-backend:latest
+            push: true
+
+    build-frontend:
+        uses: ./.github/workflows/build.service.yml
+        permissions:
+            contents: read
+            packages: write
+        with:
+            service_name: frontend
+            filter_paths: |
+                src:
+                    - 'apps/frontend/**'
+                    - 'packages/shared/**'
+                    - 'turbo.json'
+                    - 'package.json'
+                    - 'pnpm-lock.yaml'
+            dockerfile: apps/frontend/Dockerfile
+            context: .
+            image_tag: ghcr.io/okiscape/kisa-frontend:latest
+            push: true
