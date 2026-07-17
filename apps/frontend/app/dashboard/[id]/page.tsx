@@ -10,7 +10,7 @@ export default async function GuildPage({
 }) {
     const cookieStore = await cookies();
     const sessionToken = cookieStore.get("session_token")?.value;
-    if (!sessionToken) return redirect("/");
+    if (!sessionToken) return redirect("/login");
 
     const { id } = await params;
 

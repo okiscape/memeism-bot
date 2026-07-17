@@ -8,6 +8,10 @@
 .dashboard-status {
     font-size: 1.5rem;
     color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
 }
 
 .servers-page {

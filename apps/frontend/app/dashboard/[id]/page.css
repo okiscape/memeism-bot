@@ -11,6 +11,10 @@
     color: rgba(255, 255, 255, 0.4);
     width: 100%;
     text-align: center;
+    display: flex;
+    gap: 5px;
+    flex-direction: column;
+    align-items: center;
     padding-top: 60px;
 }
 
@@ -31,6 +35,10 @@
     min-width: 170px;
     flex-shrink: 0;
     padding-top: 6px;
+}
+.guild-sidebar .back {
+    margin-left: 15px;
+    color: #fff5;
 }
 
 .guild-nav-item {

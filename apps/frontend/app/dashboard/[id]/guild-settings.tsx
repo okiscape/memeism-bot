@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "next-view-transitions";
 import { useEffect, useState, useCallback } from "react";
 
 const API = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -368,7 +369,14 @@ export default function GuildSettings({ guildId }: { guildId: string }) {
     };
 
     if (loading) {
-        return <div className="guild-status">Loading settings...</div>;
+        return (
+            <div className="guild-status">
+                <div className="loading-container">
+                    <div className="bar" />
+                </div>{" "}
+                Loading settings...
+            </div>
+        );
     }
 
     const activeCategory = CATEGORIES.find((c) => c.id === activeTab)!;
@@ -376,6 +384,9 @@ export default function GuildSettings({ guildId }: { guildId: string }) {
     return (
         <div className="guild-layout">
             <nav className="guild-sidebar">
+                <Link href="/dashboard" className="back">
+                    &lt;- Back
+                </Link>
                 <GuildPreview guild={guild} />
                 {CATEGORIES.map((cat) => (
                     <button

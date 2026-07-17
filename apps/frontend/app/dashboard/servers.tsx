@@ -114,7 +114,14 @@ export default function ServersList() {
     }, []);
 
     if (loading) {
-        return <div className="dashboard-status">Loading...</div>;
+        return (
+            <div className="dashboard-status">
+                <div className="loading-container">
+                    <div className="bar" />
+                </div>{" "}
+                Loading...
+            </div>
+        );
     }
 
     if (!user) return null;

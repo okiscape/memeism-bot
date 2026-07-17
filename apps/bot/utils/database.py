@@ -52,6 +52,7 @@ db_schema = {
         "custom_greet": "TEXT",
         "custom_fare": "TEXT",
         "notify_text": "TEXT",
+        "collect_metrics": "BOOL",
     },
     "social_rating": {"user_id": "BIGINT PRIMARY KEY", "rating": "INTEGER DEFAULT 0"},
     "serververse": {
@@ -140,6 +141,40 @@ VALUES
   ({", ".join(placeholders)})
   """
         await self.execute(query, values, no_fetch=True)
+
+    async def createTable(
+        self,
+        table: str,
+        columns: dict[str, str],
+        ifNotExists: bool = True,
+        alter: bool = True,
+    ):
+        logging.info(
+            f"Start dbm.createTable for {table}",
+            ", ".join([f"{k}: {v}" for k, v in columns.items()]),
+            type="pos",
+        )
+        exists = "IF NOT EXISTS" if ifNotExists else ""
+        cols = [f'"{name}" {definition}' for name, definition in columns.items()]
+
+        await self.execute(f"""
+    CREATE TABLE {exists} {table}
+        ({", ".join(cols)})
+        """)
+
+        if alter:
+            existing_cols = set()
+            try:
+                cols_info = (await self.execute(f"PRAGMA table_info({table})")).fetchall
+                existing_cols = {row[1] for row in cols_info}
+            except Exception:
+                pass
+
+            for name, definition in columns.items():
+                if name not in existing_cols:
+                    await self.execute(
+                        f'ALTER TABLE {table} ADD COLUMN IF NOT EXISTS "{name}" {definition}'
+                    )
 
     def generateWhereClauses(self, filters: list[Filter] | list[FiltersGroup]):
         where_clauses: list[str] = []
@@ -417,19 +452,14 @@ class DatabaseManager:
     async def init_schema(self) -> None:
         await self.db.connect()
 
-        cmds = []
         for table_name in db_schema:
             table = db_schema[table_name]
-            columns = []
+            columns = {}
             for column_name in table:
-                columns.append(f"{column_name} {table[column_name]}")
+                columns[column_name] = table[column_name]
 
-            cmds.append(
-                f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(columns)})"
-            )
+            await self.db.createTable(table=table_name, columns=columns, alter=True)
 
-        for cmd in cmds:
-            await self.db.execute(cmd)
         logging.info("schema ready", self.dsn, type="DB")
 
     async def _getCached(self, store: AsyncLRUTTLCache, key: str):

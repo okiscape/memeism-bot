@@ -1,62 +1,86 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-kisa}
-      POSTGRES_USER: ${POSTGRES_USER:-kisa}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kisapass}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kisa}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+    postgres:
+        image: postgres:16-alpine
+        restart: unless-stopped
+        container_name: kisa-postgres
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        ports:
+            - "${POSTGRES_PORT:-5432}:5432"
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
 
-  bot:
-    build: ./apps/bot
-    depends_on:
-      postgres:
-        condition: service_healthy
-    env_file:
-      - .env
-    environment:
-      POSTGRES_HOST: postgres
-    restart: unless-stopped
+    bot:
+        image: ghcr.io/okiscape/kisa-bot:latest
+        restart: unless-stopped
+        container_name: kisa-bot
+        environment:
+            BOT_TOKEN: ${BOT_TOKEN}
+            BOT_OWNER_ID: ${BOT_OWNER_ID}
+            DEV_GUILD_ID: ${DEV_GUILD_ID}
+            FEEDBACK_CHANNEL_ID: ${FEEDBACK_CHANNEL_ID}
+            PROFILE_EDITS_CHANNEL_ID: ${PROFILE_EDITS_CHANNEL_ID}
+            SUPPORT_INVITE_URL: ${SUPPORT_INVITE_URL}
+            POSTGRES_HOST: postgres
+            POSTGRES_PORT: 5432
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        depends_on:
+            postgres:
+                condition: service_healthy
 
-  backend:
-    build:
-      context: .
-      dockerfile: apps/backend/Dockerfile
-    depends_on:
-      postgres:
-        condition: service_healthy
-    env_file:
-      - .env
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-kisa}:${POSTGRES_PASSWORD:-kisapass}@postgres:5432/${POSTGRES_DB:-kisa}
-      BACKEND_PORT: 3001
-    ports:
-      - "3001:3001"
-    restart: unless-stopped
+    backend:
+        image: ghcr.io/okiscape/kisa-backend:latest
+        restart: unless-stopped
+        container_name: kisa-backend
+        environment:
+            DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+            BACKEND_PORT: ${BACKEND_PORT}
+            DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+            DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
+            DISCORD_REDIRECT_URI: ${DISCORD_REDIRECT_URI}
+            NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+            NEXTAUTH_URL: ${NEXTAUTH_URL}
+        depends_on:
+            postgres:
+                condition: service_healthy
+        ports:
+            - "${BACKEND_PORT}:${BACKEND_PORT}"
 
-  frontend:
-    build:
-      context: .
-      dockerfile: apps/frontend/Dockerfile
-    depends_on:
-      - backend
-    env_file:
-      - .env
-    environment:
-      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:3001}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
-    ports:
-      - "3000:3000"
-    restart: unless-stopped
+    frontend:
+        image: ghcr.io/okiscape/kisa-frontend:latest
+        restart: unless-stopped
+        container_name: kisa-frontend
+        environment:
+            NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
+            NEXTAUTH_URL: ${NEXTAUTH_URL}
+            NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+            DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+            DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
+            DISCORD_REDIRECT_URI: ${DISCORD_REDIRECT_URI}
+        depends_on:
+            - backend
+        ports:
+            - "${FRONTEND_PORT:-3000}:3000"
+
+    watchtower:
+        image: containrrr/watchtower
+        restart: unless-stopped
+        container_name: kisa-watchtower
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ~/.docker/config.json:/config.json
+        command: --interval 60 --cleanup
+        environment:
+            - DOCKER_API_VERSION=1.40
 
 volumes:
-  pgdata:
+    pgdata:

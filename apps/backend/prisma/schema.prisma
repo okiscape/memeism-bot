@@ -55,6 +55,7 @@ model ServerSettings {
   customGreet         String?  @map("custom_greet") @db.Text
   customFare          String?  @map("custom_fare") @db.Text
   notifyText          String?  @map("notify_text") @db.Text
+  collectMetrics      Boolean? @map("collect_metrics")
 
   @@map("server_settings")
 }
